@@ -559,48 +559,38 @@ export default function InterviewPage() {
                 </select>
               </div>
 
-              <div className="bg-white rounded-lg border border-gray-200 p-6 h-48 flex flex-col justify-center">
-                <div className="text-center mb-6">
-                  <FaMicrophone
-                    className={`text-2xl mb-3 mx-auto transition-colors duration-200 ${
-                      mediaStream && audioLevel > 5
-                        ? "text-green-600"
-                        : "text-gray-400"
-                    }`}
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    Mikrofon Testi
-                  </span>
-                </div>
+              <div className="bg-white rounded-lg border border-gray-200 p-4 h-48 flex flex-col justify-center items-center">
+                <FaMicrophone
+                  className={`text-3xl mb-3 transition-colors duration-200 ${
+                    mediaStream && audioLevel > 5
+                      ? "text-green-600"
+                      : "text-gray-400"
+                  }`}
+                />
 
-                {/* Google Meet tarzı horizontal ses seviye çubukları */}
-                <div className="space-y-1.5 mb-4">
-                  {[...Array(6)].map((_, i) => {
-                    const barThreshold = (i + 1) * 16.66; // 0-100 arası eşit bölüm
+                <span className="text-sm font-medium text-gray-700 mb-4">
+                  Mikrofon Testi
+                </span>
+
+                {/* Minimal ses seviye göstergesi */}
+                <div className="flex space-x-1 mb-3">
+                  {[...Array(4)].map((_, i) => {
+                    const barThreshold = (i + 1) * 25; // 0-100 arası eşit bölüm
                     const isActive = audioLevel >= barThreshold;
 
                     return (
                       <div
                         key={i}
-                        className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden"
-                      >
-                        <div
-                          className={`h-full transition-all duration-150 ease-out rounded-full ${
-                            isActive
-                              ? i < 2
-                                ? "bg-green-500"
-                                : i < 4
-                                ? "bg-yellow-500"
-                                : "bg-red-500"
-                              : "bg-gray-200"
-                          }`}
-                          style={{
-                            width: isActive ? "100%" : "0%",
-                            transform: `scaleX(${isActive ? 1 : 0})`,
-                            transformOrigin: "left",
-                          }}
-                        />
-                      </div>
+                        className={`w-2 h-6 rounded-full transition-all duration-150 ${
+                          isActive
+                            ? i < 2
+                              ? "bg-green-500"
+                              : i < 3
+                              ? "bg-yellow-500"
+                              : "bg-red-500"
+                            : "bg-gray-200"
+                        }`}
+                      />
                     );
                   })}
                 </div>
@@ -608,9 +598,9 @@ export default function InterviewPage() {
                 <p className="text-center text-xs text-gray-500">
                   {mediaStream
                     ? audioLevel > 5
-                      ? "Konuşmaya devam edin"
-                      : "Konuşarak mikrofonu test edin"
-                    : "Mikrofon bekleniyor..."}
+                      ? "Ses alınıyor"
+                      : "Konuşun"
+                    : "Bekliyor..."}
                 </p>
               </div>
             </div>
@@ -789,61 +779,239 @@ export default function InterviewPage() {
     </div>
   );
 
-  const renderInterviewStep = () => (
-    <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-6">
-        <div className="text-2xl font-semibold text-hiri-purple mb-4">
-          {formatTime(timeLeft)}
-        </div>
-      </div>
+  const renderInterviewStep = () => {
+    const circumference = 2 * Math.PI * 45; // radius = 45
+    const strokeDasharray = circumference;
+    const strokeDashoffset = circumference - (timeLeft / 30) * circumference; // 30 saniye total
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-gray-900 rounded-lg p-6 text-white flex flex-col items-center justify-center h-48 relative">
-          <FaUser className="text-4xl mb-4" />
-          <span>HiriBot</span>
-          <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded text-xs">
-            HiriBot
+    return (
+      <div className="max-w-6xl mx-auto">
+        {/* Header with Circular Timer */}
+        <div className="flex items-center justify-center mb-8">
+          <div className="relative">
+            <svg
+              className="w-24 h-24 transform -rotate-90"
+              viewBox="0 0 100 100"
+            >
+              {/* Background circle */}
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="transparent"
+                className="text-gray-200"
+              />
+              {/* Progress circle */}
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="transparent"
+                strokeDasharray={strokeDasharray}
+                strokeDashoffset={strokeDashoffset}
+                className="text-purple-600 transition-all duration-1000 ease-linear"
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-xl font-bold text-purple-600">
+                  {formatTime(timeLeft)}
+                </div>
+                <div className="text-xs text-gray-500 font-medium">KALAN</div>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="bg-gray-900 rounded-lg p-6 text-white flex flex-col items-center justify-center h-48 relative">
-          <FaVideo className="text-4xl mb-4" />
-          <span>Siz</span>
-          <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded text-xs">
-            Videonuz
+
+        {/* Video Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* HiriBot Video */}
+          <div className="relative group">
+            <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl p-8 text-white h-64 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
+              {/* Animated background effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-purple-500/10 animate-pulse"></div>
+
+              <div className="relative z-10 text-center">
+                <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mb-4 mx-auto">
+                  <FaUser className="text-2xl text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">HiriBot</h3>
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-sm opacity-80">Aktif</span>
+                </div>
+              </div>
+
+              {/* Speaking indicator */}
+              {isSpeaking && speakingStatus.includes("HiriBot") && (
+                <div className="absolute bottom-4 left-4 right-4">
+                  <div className="flex space-x-1 justify-center">
+                    {[...Array(4)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-1 bg-green-400 rounded-full animate-pulse"
+                        style={{
+                          height: `${12 + Math.random() * 12}px`,
+                          animationDelay: `${i * 150}ms`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* User Video */}
+          <div className="relative group">
+            <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl p-8 text-white h-64 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
+              {/* User video placeholder */}
+              <div className="relative z-10 text-center">
+                <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mb-4 mx-auto">
+                  <FaVideo className="text-2xl text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Siz</h3>
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                  <span className="text-sm opacity-80">Kayıt</span>
+                </div>
+              </div>
+
+              {/* Microphone level indicator */}
+              <div className="absolute bottom-4 right-4">
+                <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                  <FaMicrophone
+                    className={`text-sm ${
+                      audioLevel > 5 ? "text-green-400" : "text-gray-400"
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Chat Section */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          {/* Chat Header */}
+          <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4">
+            <div className="flex items-center justify-between text-white">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                  <FaUser className="text-sm" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Mülakat Sohbeti</h3>
+                  <p className="text-sm opacity-90">HiriBot ile konuşuyor</p>
+                </div>
+              </div>
+              <div className="text-sm opacity-90">
+                Soru {questionIndex + 1}/{hiribotQuestions.length}
+              </div>
+            </div>
+          </div>
+
+          {/* Chat Messages */}
+          <div className="h-48 overflow-y-auto p-6 space-y-4 bg-gray-50">
+            {chatMessages.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">
+                <FaUser className="text-2xl mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Mülakat başlıyor...</p>
+              </div>
+            ) : (
+              chatMessages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${
+                    message.sender === "hiribot"
+                      ? "justify-start"
+                      : "justify-end"
+                  }`}
+                >
+                  <div
+                    className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${
+                      message.sender === "hiribot"
+                        ? "bg-white border border-gray-200 text-gray-800"
+                        : "bg-blue-600 text-white"
+                    }`}
+                  >
+                    <p className="text-sm leading-relaxed">{message.message}</p>
+                    <div className="flex items-center mt-2 space-x-1">
+                      <div
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          message.sender === "hiribot"
+                            ? "bg-purple-400"
+                            : "bg-blue-200"
+                        }`}
+                      />
+                      <span
+                        className={`text-xs ${
+                          message.sender === "hiribot"
+                            ? "text-gray-500"
+                            : "text-blue-100"
+                        }`}
+                      >
+                        {message.sender === "hiribot" ? "HiriBot" : "Siz"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Speaking Status */}
+          <div className="bg-white px-6 py-4 border-t border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                {isSpeaking ? (
+                  <>
+                    <div className="flex space-x-1">
+                      {[...Array(3)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+                          style={{ animationDelay: `${i * 200}ms` }}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-600 font-medium">
+                      {speakingStatus}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600 font-medium">
+                      Hazır
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {/* Progress indicator */}
+              <div className="flex items-center space-x-2">
+                <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full transition-all duration-500"
+                    style={{ width: `${speakingProgress}%` }}
+                  />
+                </div>
+                <span className="text-xs text-gray-500 font-medium">
+                  {Math.round(speakingProgress)}%
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      <div className="mb-6 max-h-64 overflow-y-auto space-y-2">
-        {chatMessages.map((message) => (
-          <div
-            key={message.id}
-            className={`chat-message ${
-              message.sender === "hiribot" ? "assistant" : "user"
-            }`}
-          >
-            {message.message}
-          </div>
-        ))}
-      </div>
-
-      <div className="mb-2">
-        <div className="w-full bg-gray-200 rounded-full h-4">
-          <div
-            className={`h-4 rounded-full transition-all duration-300 ${
-              isSpeaking && speakingStatus.includes("answer")
-                ? "bg-hiri-purple animate-pulse-light"
-                : "bg-hiri-blue"
-            }`}
-            style={{ width: `${speakingProgress}%` }}
-          />
-        </div>
-        <p className="text-sm text-gray-500 mt-2 text-center">
-          {speakingStatus}
-        </p>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderCompleteStep = () => (
     <div className="max-w-2xl mx-auto text-center">
