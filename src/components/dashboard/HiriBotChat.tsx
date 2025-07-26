@@ -10,7 +10,29 @@ import {
   FaMagic,
   FaUser,
   FaTimes,
+  FaHistory,
+  FaPlus,
+  FaTrash,
+  FaEdit,
+  FaBars,
+  FaChevronLeft,
 } from "react-icons/fa";
+
+// Types
+interface ChatMessage {
+  id: string;
+  type: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+}
+
+interface ChatSession {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 // Modal Portal Component
 function ModalPortal({ children }: { children: React.ReactNode }) {
@@ -29,41 +51,152 @@ function ModalPortal({ children }: { children: React.ReactNode }) {
 export function HiriBotChat() {
   const [chatInput, setChatInput] = useState("");
   const [showChatModal, setShowChatModal] = useState(false);
-  const [chatMessages, setChatMessages] = useState<
-    Array<{
-      id: string;
-      type: "user" | "assistant";
-      content: string;
-      timestamp: Date;
-    }>
-  >([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
+
+  // Chat sessions state
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
+
+  // Get current session
+  const currentSession = chatSessions.find(
+    (session) => session.id === currentSessionId
+  );
+  const chatMessages = currentSession?.messages || [];
+
+  // Load sessions from localStorage on mount
+  useEffect(() => {
+    const savedSessions = localStorage.getItem("hiri-chat-sessions");
+    if (savedSessions) {
+      try {
+        const parsedSessions = JSON.parse(savedSessions).map(
+          (session: any) => ({
+            ...session,
+            createdAt: new Date(session.createdAt),
+            updatedAt: new Date(session.updatedAt),
+            messages: session.messages.map((msg: any) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp),
+            })),
+          })
+        );
+        setChatSessions(parsedSessions);
+      } catch (error) {
+        console.error("Error loading chat sessions:", error);
+      }
+    }
+  }, []);
+
+  // Save sessions to localStorage whenever sessions change
+  useEffect(() => {
+    if (chatSessions.length > 0) {
+      localStorage.setItem("hiri-chat-sessions", JSON.stringify(chatSessions));
+    }
+  }, [chatSessions]);
+
+  const createNewSession = (initialMessage?: ChatMessage): string => {
+    const newSession: ChatSession = {
+      id: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      title: initialMessage
+        ? generateSessionTitle(initialMessage.content)
+        : "Yeni Konuşma",
+      messages: initialMessage ? [initialMessage] : [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    setChatSessions((prev) => [newSession, ...prev]);
+    setCurrentSessionId(newSession.id);
+    return newSession.id;
+  };
+
+  const generateSessionTitle = (firstMessage: string): string => {
+    const truncated = firstMessage.slice(0, 30);
+    return truncated.length < firstMessage.length
+      ? `${truncated}...`
+      : truncated;
+  };
+
+  const updateSession = (sessionId: string, updates: Partial<ChatSession>) => {
+    setChatSessions((prev) =>
+      prev.map((session) =>
+        session.id === sessionId
+          ? { ...session, ...updates, updatedAt: new Date() }
+          : session
+      )
+    );
+  };
+
+  const deleteSession = (sessionId: string) => {
+    if (confirm("Bu konuşmayı silmek istediğinizden emin misiniz?")) {
+      setChatSessions((prev) =>
+        prev.filter((session) => session.id !== sessionId)
+      );
+      if (currentSessionId === sessionId) {
+        setCurrentSessionId(null);
+      }
+    }
+  };
+
+  const selectSession = (sessionId: string) => {
+    setCurrentSessionId(sessionId);
+    setShowSidebar(false);
+  };
+
+  const startNewConversation = () => {
+    setCurrentSessionId(null);
+    setShowSidebar(false);
+  };
 
   const handleOpenChat = () => {
-    if (!chatInput.trim()) return;
+    // If no input but has chat history, just open modal to show history
+    if (!chatInput.trim()) {
+      if (chatSessions.length > 0) {
+        setShowChatModal(true);
+        return;
+      } else {
+        return; // No input and no history, do nothing
+      }
+    }
 
-    // Initialize chat with user's query
-    const userMessage = {
+    const userMessage: ChatMessage = {
       id: `user_${Date.now()}`,
-      type: "user" as const,
+      type: "user",
       content: chatInput,
       timestamp: new Date(),
     };
 
-    setChatMessages([userMessage]);
+    let sessionId = currentSessionId;
+    if (!sessionId) {
+      sessionId = createNewSession(userMessage);
+    } else {
+      updateSession(sessionId, {
+        messages: [...chatMessages, userMessage],
+      });
+    }
+
     setShowChatModal(true);
     setChatInput("");
 
     // Simulate AI response
     setIsTyping(true);
     setTimeout(() => {
-      const aiResponse = {
+      const aiResponse: ChatMessage = {
         id: `ai_${Date.now()}`,
-        type: "assistant" as const,
+        type: "assistant",
         content: generateAIResponse(userMessage.content),
         timestamp: new Date(),
       };
-      setChatMessages((prev) => [...prev, aiResponse]);
+
+      const updatedMessages = currentSession
+        ? [...currentSession.messages, userMessage, aiResponse]
+        : [userMessage, aiResponse];
+
+      updateSession(sessionId!, {
+        messages: updatedMessages,
+      });
       setIsTyping(false);
     }, 1500);
   };
@@ -71,28 +204,52 @@ export function HiriBotChat() {
   const handleSendMessage = () => {
     if (!chatInput.trim() || isTyping) return;
 
-    const userMessage = {
+    const userMessage: ChatMessage = {
       id: `user_${Date.now()}`,
-      type: "user" as const,
+      type: "user",
       content: chatInput,
       timestamp: new Date(),
     };
 
-    setChatMessages((prev) => [...prev, userMessage]);
+    let sessionId = currentSessionId;
+    if (!sessionId) {
+      sessionId = createNewSession(userMessage);
+    } else {
+      updateSession(sessionId, {
+        messages: [...chatMessages, userMessage],
+      });
+    }
+
     setChatInput("");
     setIsTyping(true);
 
     // Simulate AI response
     setTimeout(() => {
-      const aiResponse = {
+      const aiResponse: ChatMessage = {
         id: `ai_${Date.now()}`,
-        type: "assistant" as const,
+        type: "assistant",
         content: generateAIResponse(userMessage.content),
         timestamp: new Date(),
       };
-      setChatMessages((prev) => [...prev, aiResponse]);
+
+      const session = chatSessions.find((s) => s.id === sessionId);
+      const updatedMessages = session
+        ? [...session.messages, userMessage, aiResponse]
+        : [userMessage, aiResponse];
+
+      updateSession(sessionId!, {
+        messages: updatedMessages,
+      });
       setIsTyping(false);
     }, 1500);
+  };
+
+  const handleEditSessionTitle = (sessionId: string, newTitle: string) => {
+    if (newTitle.trim()) {
+      updateSession(sessionId, { title: newTitle.trim() });
+    }
+    setEditingSessionId(null);
+    setEditingTitle("");
   };
 
   const generateAIResponse = (userQuery: string): string => {
@@ -137,8 +294,8 @@ export function HiriBotChat() {
 
   const suggestedQueries = [
     "Kıdemli Geliştirici için en iyi 5 adayı göster",
-    "Mehmet Ali Demir&apos;in profilini analiz et",
-    "Gamze Nur&apos;a mülakat daveti gönder",
+    "Mehmet Ali Demir'in profilini analiz et",
+    "Gamze Nur'a mülakat daveti gönder",
   ];
 
   // Auto scroll chat to bottom
@@ -173,7 +330,11 @@ export function HiriBotChat() {
               type="text"
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
-              placeholder="örn: En uygun 5 adayı listele..."
+              placeholder={
+                chatSessions.length > 0
+                  ? "Yeni soru yazın veya geçmiş sohbetlerinizi görün..."
+                  : "örn: En uygun 5 adayı listele..."
+              }
               onKeyDown={handleKeyPress}
               className="hiri-input text-sm pl-10 pr-20"
             />
@@ -182,10 +343,16 @@ export function HiriBotChat() {
             </div>
             <button
               onClick={showChatModal ? handleSendMessage : handleOpenChat}
-              disabled={!chatInput.trim() || isTyping}
+              disabled={
+                (!chatInput.trim() && chatSessions.length === 0) || isTyping
+              }
               className="absolute right-2 top-1/2 -translate-y-1/2 bg-hiri-purple hover:bg-hiri-purple-dark disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-hiri-purple focus:ring-offset-2"
             >
-              {isTyping ? "..." : "Gönder"}
+              {isTyping
+                ? "..."
+                : !chatInput.trim() && chatSessions.length > 0
+                ? "Sohbet Aç"
+                : "Gönder"}
             </button>
           </div>
         </div>
@@ -234,184 +401,347 @@ export function HiriBotChat() {
           <div
             className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4"
             style={{ zIndex: 9999 }}
-            onClick={() => setShowChatModal(false)}
+            onClick={() => {
+              setShowChatModal(false);
+              setCurrentSessionId(null);
+              setShowSidebar(false);
+            }}
           >
             <div
-              className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col"
+              className="bg-white rounded-xl shadow-2xl w-full max-w-6xl h-[85vh] flex"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Chat Header */}
-              <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-gradient-to-r from-hiri-purple to-indigo-600 text-white rounded-t-xl">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                    <FaMagic className="text-lg" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Hiri AI Asistanı</h3>
-                    <p className="text-sm text-white text-opacity-80">
-                      İK ve İşe Alım Danışmanınız
-                    </p>
+              {/* Sidebar */}
+              <div
+                className={`bg-slate-900 text-white transition-all duration-300 flex flex-col ${
+                  showSidebar ? "w-80" : "w-0"
+                } overflow-hidden rounded-l-xl`}
+              >
+                {/* Sidebar Header */}
+                <div className="p-4 border-b border-slate-700">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-lg flex items-center">
+                      <FaHistory className="mr-2" />
+                      Konuşma Geçmişi
+                    </h3>
+                    <button
+                      onClick={() => setShowSidebar(false)}
+                      className="text-slate-400 hover:text-white transition-colors"
+                    >
+                      <FaChevronLeft className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
-                <button
-                  onClick={() => setShowChatModal(false)}
-                  className="text-white hover:text-gray-200 transition-colors p-1"
-                >
-                  <FaTimes className="w-6 h-6" />
-                </button>
+
+                {/* New Conversation Button */}
+                <div className="p-4 border-b border-slate-700">
+                  <button
+                    onClick={startNewConversation}
+                    className="w-full bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-4 py-2 flex items-center justify-center text-sm transition-colors"
+                  >
+                    <FaPlus className="mr-2 text-xs" />
+                    Yeni Konuşma
+                  </button>
+                </div>
+
+                {/* Sessions List */}
+                <div className="flex-1 overflow-y-auto p-2">
+                  {chatSessions.length === 0 ? (
+                    <div className="text-center text-slate-400 mt-8">
+                      <FaHistory className="mx-auto mb-2 text-2xl" />
+                      <p className="text-sm">Henüz konuşma geçmişi yok</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      {chatSessions.map((session) => (
+                        <div
+                          key={session.id}
+                          className={`group relative p-3 rounded-lg cursor-pointer transition-colors ${
+                            currentSessionId === session.id
+                              ? "bg-slate-700 border border-slate-600"
+                              : "hover:bg-slate-800"
+                          }`}
+                          onClick={() => selectSession(session.id)}
+                        >
+                          {editingSessionId === session.id ? (
+                            <input
+                              type="text"
+                              value={editingTitle}
+                              onChange={(e) => setEditingTitle(e.target.value)}
+                              onBlur={() =>
+                                handleEditSessionTitle(session.id, editingTitle)
+                              }
+                              onKeyPress={(e) => {
+                                if (e.key === "Enter") {
+                                  handleEditSessionTitle(
+                                    session.id,
+                                    editingTitle
+                                  );
+                                }
+                                if (e.key === "Escape") {
+                                  setEditingSessionId(null);
+                                  setEditingTitle("");
+                                }
+                              }}
+                              className="w-full bg-slate-600 text-white text-sm rounded px-2 py-1 border-none outline-none"
+                              autoFocus
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          ) : (
+                            <>
+                              <h4 className="text-sm font-medium text-white truncate mb-1">
+                                {session.title}
+                              </h4>
+                              <div className="flex items-center justify-between">
+                                <p className="text-xs text-slate-400">
+                                  {session.messages.length} mesaj
+                                </p>
+                                <p className="text-xs text-slate-500">
+                                  {session.updatedAt.toLocaleDateString(
+                                    "tr-TR",
+                                    {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                    }
+                                  )}
+                                </p>
+                              </div>
+
+                              {/* Action buttons */}
+                              <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingSessionId(session.id);
+                                    setEditingTitle(session.title);
+                                  }}
+                                  className="p-1 text-slate-400 hover:text-white transition-colors"
+                                >
+                                  <FaEdit className="w-3 h-3" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteSession(session.id);
+                                  }}
+                                  className="p-1 text-slate-400 hover:text-red-400 transition-colors"
+                                >
+                                  <FaTrash className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Chat Messages */}
-              <div
-                id="dashboardChatContainer"
-                className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-slate-50 to-white"
-              >
-                {chatMessages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${
-                      message.type === "user" ? "justify-end" : "justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`flex items-start space-x-2 max-w-[80%] ${
-                        message.type === "user"
-                          ? "flex-row-reverse space-x-reverse"
-                          : ""
-                      }`}
+              {/* Main Chat Area */}
+              <div className="flex-1 flex flex-col">
+                {/* Chat Header */}
+                <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-gradient-to-r from-hiri-purple to-indigo-600 text-white rounded-tr-xl">
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={() => setShowSidebar(true)}
+                      className="text-white hover:text-gray-200 transition-colors p-1 mr-2"
                     >
-                      {/* Avatar */}
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          message.type === "user"
-                            ? "bg-hiri-purple text-white"
-                            : "bg-gradient-to-br from-indigo-500 to-purple-600 text-white"
-                        }`}
-                      >
-                        {message.type === "user" ? (
-                          <FaUser className="text-xs" />
-                        ) : (
-                          <FaMagic className="text-xs" />
-                        )}
-                      </div>
-
-                      {/* Message Bubble */}
-                      <div
-                        className={`relative p-3 rounded-2xl shadow-sm ${
-                          message.type === "user"
-                            ? "bg-hiri-purple text-white rounded-br-md"
-                            : "bg-white text-slate-700 border border-slate-200 rounded-bl-md"
-                        }`}
-                      >
-                        <p className="text-sm leading-relaxed">
-                          {message.content}
-                        </p>
-                        <p
-                          className={`text-xs mt-1 ${
-                            message.type === "user"
-                              ? "text-white text-opacity-70"
-                              : "text-slate-400"
-                          }`}
-                        >
-                          {message.timestamp.toLocaleTimeString("tr-TR", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-
-                        {/* Message tail */}
-                        <div
-                          className={`absolute top-4 ${
-                            message.type === "user"
-                              ? "right-0 translate-x-1 border-l-8 border-l-hiri-purple border-t-4 border-b-4 border-t-transparent border-b-transparent"
-                              : "left-0 -translate-x-1 border-r-8 border-r-white border-t-4 border-b-4 border-t-transparent border-b-transparent"
-                          }`}
-                        />
-                      </div>
+                      <FaBars className="w-5 h-5" />
+                    </button>
+                    <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                      <FaMagic className="text-lg" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">
+                        {currentSession
+                          ? currentSession.title
+                          : "Hiri AI Asistanı"}
+                      </h3>
+                      <p className="text-sm text-white text-opacity-80">
+                        İK ve İşe Alım Danışmanınız
+                      </p>
                     </div>
                   </div>
-                ))}
+                  <button
+                    onClick={() => {
+                      setShowChatModal(false);
+                      setCurrentSessionId(null);
+                      setShowSidebar(false);
+                    }}
+                    className="text-white hover:text-gray-200 transition-colors p-1"
+                  >
+                    <FaTimes className="w-6 h-6" />
+                  </button>
+                </div>
 
-                {/* Typing Indicator */}
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="flex items-start space-x-2 max-w-[80%]">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                        <FaMagic className="text-xs text-white" />
+                {/* Chat Messages */}
+                <div
+                  id="dashboardChatContainer"
+                  className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-slate-50 to-white"
+                >
+                  {chatMessages.length === 0 ? (
+                    <div className="text-center text-slate-500 mt-16">
+                      <FaRobot className="mx-auto mb-4 text-4xl text-slate-400" />
+                      <h3 className="text-lg font-semibold mb-2">
+                        Merhaba! Size nasıl yardımcı olabilirim?
+                      </h3>
+                      <p className="text-sm">
+                        Aday analizi, mülakat süreçleri veya CV
+                        değerlendirmeleri hakkında sorularınızı sorabilirsiniz.
+                      </p>
+                    </div>
+                  ) : (
+                    chatMessages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${
+                          message.type === "user"
+                            ? "justify-end"
+                            : "justify-start"
+                        }`}
+                      >
+                        <div
+                          className={`flex items-start space-x-2 max-w-[80%] ${
+                            message.type === "user"
+                              ? "flex-row-reverse space-x-reverse"
+                              : ""
+                          }`}
+                        >
+                          {/* Avatar */}
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                              message.type === "user"
+                                ? "bg-hiri-purple text-white"
+                                : "bg-gradient-to-br from-indigo-500 to-purple-600 text-white"
+                            }`}
+                          >
+                            {message.type === "user" ? (
+                              <FaUser className="text-xs" />
+                            ) : (
+                              <FaMagic className="text-xs" />
+                            )}
+                          </div>
+
+                          {/* Message Bubble */}
+                          <div
+                            className={`relative p-3 rounded-2xl shadow-sm ${
+                              message.type === "user"
+                                ? "bg-hiri-purple text-white rounded-br-md"
+                                : "bg-white text-slate-700 border border-slate-200 rounded-bl-md"
+                            }`}
+                          >
+                            <p className="text-sm leading-relaxed">
+                              {message.content}
+                            </p>
+                            <p
+                              className={`text-xs mt-1 ${
+                                message.type === "user"
+                                  ? "text-white text-opacity-70"
+                                  : "text-slate-400"
+                              }`}
+                            >
+                              {message.timestamp.toLocaleTimeString("tr-TR", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+
+                            {/* Message tail */}
+                            <div
+                              className={`absolute top-4 ${
+                                message.type === "user"
+                                  ? "right-0 translate-x-1 border-l-8 border-l-hiri-purple border-t-4 border-b-4 border-t-transparent border-b-transparent"
+                                  : "left-0 -translate-x-1 border-r-8 border-r-white border-t-4 border-b-4 border-t-transparent border-b-transparent"
+                              }`}
+                            />
+                          </div>
+                        </div>
                       </div>
-                      <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-md p-3 shadow-sm">
-                        <div className="flex space-x-1">
-                          <div
-                            className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
-                            style={{ animationDelay: "0ms" }}
-                          ></div>
-                          <div
-                            className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
-                            style={{ animationDelay: "150ms" }}
-                          ></div>
-                          <div
-                            className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
-                            style={{ animationDelay: "300ms" }}
-                          ></div>
+                    ))
+                  )}
+
+                  {/* Typing Indicator */}
+                  {isTyping && (
+                    <div className="flex justify-start">
+                      <div className="flex items-start space-x-2 max-w-[80%]">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                          <FaMagic className="text-xs text-white" />
+                        </div>
+                        <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-md p-3 shadow-sm">
+                          <div className="flex space-x-1">
+                            <div
+                              className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                              style={{ animationDelay: "0ms" }}
+                            ></div>
+                            <div
+                              className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                              style={{ animationDelay: "150ms" }}
+                            ></div>
+                            <div
+                              className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                              style={{ animationDelay: "300ms" }}
+                            ></div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
 
-              {/* Chat Input */}
-              <div className="p-4 border-t border-slate-200 bg-white rounded-b-xl">
-                {/* Quick Actions - Only show when input is empty */}
-                {chatInput === "" && (
-                  <div className="mb-3 flex flex-wrap gap-2">
-                    {quickActions.map((action, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setChatInput(action)}
-                        className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-full transition-colors"
-                      >
-                        {action}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {/* Chat Input */}
+                <div className="p-4 border-t border-slate-200 bg-white rounded-br-xl">
+                  {/* Quick Actions - Only show when input is empty */}
+                  {chatInput === "" && (
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      {quickActions.map((action, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setChatInput(action)}
+                          className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-full transition-colors"
+                        >
+                          {action}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
-                <div className="flex items-end space-x-3">
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder="Sorunuzu yazın..."
-                      className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-hiri-purple focus:border-transparent transition-all duration-200 h-11"
-                    />
-                  </div>
+                  <div className="flex items-end space-x-3">
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Sorunuzu yazın..."
+                        className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-hiri-purple focus:border-transparent transition-all duration-200 h-11"
+                      />
+                    </div>
 
-                  <button
-                    onClick={handleSendMessage}
-                    disabled={!chatInput.trim() || isTyping}
-                    className="w-11 h-11 bg-hiri-purple hover:bg-hiri-purple-dark disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-2xl flex items-center justify-center transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-hiri-purple focus:ring-offset-2"
-                  >
-                    {isTyping ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                        />
-                      </svg>
-                    )}
-                  </button>
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={!chatInput.trim() || isTyping}
+                      className="w-11 h-11 bg-hiri-purple hover:bg-hiri-purple-dark disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-2xl flex items-center justify-center transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-hiri-purple focus:ring-offset-2"
+                    >
+                      {isTyping ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
