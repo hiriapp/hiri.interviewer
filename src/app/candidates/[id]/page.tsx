@@ -18,6 +18,13 @@ import {
   FaMagic,
   FaQuestionCircle,
   FaUser,
+  FaChevronDown,
+  FaChevronUp,
+  FaHistory,
+  FaStickyNote,
+  FaFileImport,
+  FaUserPlus,
+  FaEye,
 } from "react-icons/fa";
 import { DUMMY_CANDIDATES } from "@/lib/dummy-data";
 
@@ -85,6 +92,10 @@ export default function CandidateProfilePage() {
     notesFile: null as File | null,
     videoFile: null as File | null,
   });
+
+  // Notes and Logs state
+  const [showNotesLogsAccordion, setShowNotesLogsAccordion] = useState(false);
+  const [newNoteText, setNewNoteText] = useState("");
   const candidateId = params.id as string;
 
   // Merkezi veri kaynağından aday bilgilerini al
@@ -382,6 +393,44 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const handleAddNote = () => {
+    if (!newNoteText.trim()) return;
+
+    // Add note to candidate data (in a real app, this would be an API call)
+    if (candidate?.notes) {
+      candidate.notes.push({
+        user: "Tuna Can", // In a real app, this would come from the current user
+        timestamp:
+          new Date().toLocaleDateString("tr-TR") +
+          " " +
+          new Date().toLocaleTimeString("tr-TR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        text: newNoteText.trim(),
+      });
+
+      // Add a log entry for the note
+      if (candidate?.logs) {
+        candidate.logs.unshift({
+          user: "Tuna Can",
+          timestamp:
+            new Date().toLocaleDateString("tr-TR") +
+            " " +
+            new Date().toLocaleTimeString("tr-TR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          action: "Aday hakkında not eklendi.",
+          icon: "fa-sticky-note",
+          color: "bg-yellow-100 text-yellow-600",
+        });
+      }
+    }
+
+    setNewNoteText("");
   };
 
   const handleCompatibilityTooltipShow = (event: React.MouseEvent) => {
@@ -785,6 +834,126 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
                     </div>
                   ))
                 )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Notes and Transaction History Accordion */}
+        <div className="mt-8">
+          <div
+            className="cursor-pointer p-4 bg-slate-50 rounded-lg font-semibold transition-colors hover:bg-slate-100 border border-slate-200 flex justify-between items-center"
+            onClick={() => setShowNotesLogsAccordion(!showNotesLogsAccordion)}
+          >
+            <span className="flex items-center">
+              <FaHistory className="mr-2 text-hiri-purple" />
+              Notlar ve İşlem Geçmişi
+            </span>
+            {showNotesLogsAccordion ? (
+              <FaChevronUp className="transition-transform" />
+            ) : (
+              <FaChevronDown className="transition-transform" />
+            )}
+          </div>
+
+          {showNotesLogsAccordion && (
+            <div className="bg-white border border-slate-200 border-t-0 rounded-b-lg p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Notes Section */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 pb-2 border-b border-slate-200">
+                    Aday Hakkındaki Notlar
+                  </h3>
+                  <div className="mb-4">
+                    <textarea
+                      value={newNoteText}
+                      onChange={(e) => setNewNoteText(e.target.value)}
+                      className="w-full border border-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-hiri-purple focus:border-transparent"
+                      rows={3}
+                      placeholder="Yeni not ekleyin..."
+                    />
+                    <button
+                      onClick={handleAddNote}
+                      className="hiri-button hiri-button-primary text-sm py-2 px-4 mt-2"
+                    >
+                      <FaStickyNote className="mr-2" />
+                      Kaydet
+                    </button>
+                  </div>
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {candidate?.notes && candidate.notes.length > 0 ? (
+                      [...candidate.notes].reverse().map((note, index) => (
+                        <div
+                          key={index}
+                          className="bg-slate-50 p-3 rounded-lg border border-slate-200"
+                        >
+                          <p className="text-sm text-slate-700 leading-relaxed">
+                            {note.text}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-2 text-right">
+                            -- {note.user} ({note.timestamp})
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm italic text-center p-4 text-slate-500">
+                        Henüz not eklenmemiş.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Transaction History Section */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 pb-2 border-b border-slate-200">
+                    İşlem Geçmişi
+                  </h3>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {candidate?.logs && candidate.logs.length > 0 ? (
+                      [...candidate.logs].reverse().map((log, index) => {
+                        const getIconComponent = (iconName: string) => {
+                          switch (iconName) {
+                            case "fa-sticky-note":
+                              return <FaStickyNote />;
+                            case "fa-file-import":
+                              return <FaFileImport />;
+                            case "fa-user-plus":
+                              return <FaUserPlus />;
+                            case "fa-eye":
+                              return <FaEye />;
+                            default:
+                              return <FaHistory />;
+                          }
+                        };
+
+                        return (
+                          <div
+                            key={index}
+                            className="flex items-start py-3 border-b border-slate-100 last:border-b-0"
+                          >
+                            <div
+                              className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-3 ${log.color}`}
+                            >
+                              {getIconComponent(log.icon)}
+                            </div>
+                            <div className="flex-grow">
+                              <p className="text-sm text-slate-700">
+                                {log.action}
+                              </p>
+                              <p className="text-xs text-slate-500 mt-1">
+                                {log.user} - {log.timestamp}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p className="text-sm italic text-center p-4 text-slate-500">
+                        İşlem geçmişi bulunamadı.
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           )}

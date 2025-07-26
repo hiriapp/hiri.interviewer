@@ -56,7 +56,42 @@ SERTİFİKALAR
         status: "Planlandı",
         notes: "HiriBot tarafından kaydedilecek teknik mülakat. Adayın React, TypeScript ve problem çözme becerileri değerlendirilecek.",
         hasReport: true
-      }
+      },
+    ],
+    notes: [
+      {
+        user: "Elif Kaya",
+        timestamp: "10.06.2025 14:30",
+        text: "Teknik mülakat performansı çok iyiydi.",
+      },
+      {
+        user: "Tuna Can",
+        timestamp: "09.06.2025 11:00",
+        text: "Adayın GitHub profili incelendi, temiz kod yazıyor.",
+      },
+    ],
+    logs: [
+      {
+        user: "Elif Kaya",
+        timestamp: "10.06.2025 15:45",
+        action: "Hakkında not eklendi.",
+        icon: "fa-sticky-note",
+        color: "bg-yellow-100 text-yellow-600",
+      },
+      {
+        user: "Tuna Can",
+        timestamp: "10.06.2025 11:20",
+        action: "Kişilik envanteri yüklendi.",
+        icon: "fa-file-import",
+        color: "bg-teal-100 text-teal-600",
+      },
+      {
+        user: "Sistem",
+        timestamp: "08.06.2025 18:00",
+        action: "Aday oluşturuldu.",
+        icon: "fa-user-plus",
+        color: "bg-blue-100 text-blue-600",
+      },
     ]
   },
   {
@@ -110,6 +145,16 @@ EĞİTİM
         notes: "İK ve Teknik değerlendirme.",
         hasReport: false
       }
+    ],
+    notes: [],
+    logs: [
+        {
+          user: "Sistem",
+          timestamp: "07.06.2025 11:00",
+          action: "Aday oluşturuldu.",
+          icon: "fa-user-plus",
+          color: "bg-blue-100 text-blue-600",
+        }
     ]
   },
   {
@@ -164,6 +209,16 @@ Dijital trendler, tüketici davranışları, sürdürülebilir pazarlama, fotoğ
         notes: "İK Yöneticisi Elif Hanım ile yapılan ilk tanışma ve yetkinlik bazlı görüşme notları.",
         hasReport: true
       }
+    ],
+    notes: [],
+    logs: [
+        {
+          user: "Sistem",
+          timestamp: "06.06.2025 17:00",
+          action: "Aday oluşturuldu.",
+          icon: "fa-user-plus",
+          color: "bg-blue-100 text-blue-600",
+        }
     ]
   }
 ]; 
