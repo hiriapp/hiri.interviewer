@@ -260,6 +260,10 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
         type: interview.type,
         introduction:
           "Mehmet Ali Demir, Senior Software Developer pozisyonu için değerlendirilen, 7+ yıl deneyimli bir frontend geliştiricidir. Mülakat, adayın teknik derinliğini ve pratik uygulama becerilerini ölçmeyi amaçlamıştır. Genel olarak pozisyona uygun bir profil çizmektedir.",
+        experienceAnalysis:
+          "Aday, önceki projelerinde React ve TypeScript'i etkin bir şekilde kullandığını, özellikle büyük ölçekli uygulamalarda state management (Redux, Zustand) ve performans optimizasyonu konularında önemli katkılar sağladığını belirtti. React Flow ile geliştirdiği iş akışı arayüzleri, karmaşık UI problemlerine yenilikçi çözümler getirme yeteneğini göstermektedir. Proje yönetimi metodolojilerinden Agile (Scrum) ile çalıştığını ve bu metodolojinin avantajlarını etkin bir şekilde kullandığını ifade etti.",
+        otherSkills:
+          "AI destekli geliştirme araçlarına (GitHub Copilot) aşina olması ve açık kaynak projelere katkıda bulunması, teknolojik gelişmeleri takip ettiğini ve topluluk odaklı olduğunu göstermektedir. Temel Python bilgisi ve Docker kullanımı da artılarıdır. Finansal süreçleri yönetirken kullandığı spesifik araçlar belirtilmedi ancak genel problem çözme yaklaşımı bu tür araçlara hızla adapte olabileceğini düşündürmektedir.",
         strengths: [
           "**React & TypeScript Yetkinliği:** Projelerinde bu teknolojileri derinlemesine kullandığını somut örneklerle (SaaS platformu geliştirme, %30 hata oranı azaltma) destekledi.",
           "**Problem Çözme ve Analitik Düşünme:** Karmaşık UI problemlerini çözme ve performans iyileştirmeleri yapma konusundaki başarıları (sayfa yükleme %40 iyileştirme).",
@@ -272,6 +276,36 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
           "**Kapsamlı E2E Test Deneyimi:** Cypress bilgisi temel düzeyde, daha büyük ölçekli projelerde E2E test stratejileri geliştirme ve uygulama konusunda derinleşebilir.",
           "**Yapay Zeka Pratik Uygulamaları:** AI/ML konseptlerine aşinalığı olsa da, bu alanda bitmiş bir proje sunmaması, pratik uygulama deneyiminin sınırlı olabileceğini düşündürmektedir.",
         ],
+        starExamples: [
+          {
+            situation:
+              "Önceki projesinde büyük bir e-ticaret sitesinde sayfa yükleme sürelerinin yavaş olması ve kullanıcı deneyimini olumsuz etkilemesi.",
+            task: "Sayfa performansını %30 oranında iyileştirmek ve kullanıcı memnuniyetini artırmak.",
+            action:
+              "Detaylı performans analizi yaptı (Lighthouse, Profiler). Code splitting, lazy loading tekniklerini uyguladı. Gereksiz re-render'ları önlemek için React.memo, useMemo ve useCallback kancalarını etkin kullandı. Resimleri yeni nesil formatlarda (örn: WebP) optimize etti ve CDN kullanımını yaygınlaştırdı.",
+            result:
+              "Sayfa yükleme süreleri (LCP) ortalama %40 iyileşti, interaktiflik (FID) skorları yükseldi, kullanıcı memnuniyetinde belirgin artış ve bounce rate'de %15 düşüş gözlendi.",
+            competency: "Performans Optimizasyonu",
+          },
+          {
+            situation:
+              "Yeni bir özellik için karmaşık, sürükle-bırak tabanlı bir iş akışı tasarım arayüzü geliştirilmesi gerekti.",
+            task: "Kullanıcıların düğümleri kolayca ekleyip bağlayabileceği, konfigüre edebileceği interaktif ve performanslı bir arayüz oluşturmak.",
+            action:
+              "React Flow kütüphanesini seçti, özel düğüm tipleri ve kenar bağlantıları geliştirdi. Durum yönetimi için Zustand kullandı. Arayüzün karmaşıklığına rağmen yüksek performansı korumak için sanallaştırma tekniklerini araştırdı ve uyguladı.",
+            result:
+              "Kullanıcılar özelliği hızla benimsedi ve iş akışlarını %50 daha hızlı oluşturabildiklerini belirtti. Geliştirme süresi, benzer karmaşıklıktaki bir özellik için beklenenden %20 daha kısa sürdü.",
+            competency: "UI/UX Geliştirme ve Kütüphane Kullanımı",
+          },
+        ],
+        suitabilityAndRecommendations: {
+          suitabilityStatus: "Pozisyona Yüksek Derecede Uygun",
+          developmentSuggestions: [
+            "AWS servisleri (özellikle sunucusuz mimariler ve veritabanları) üzerine sertifikasyon veya proje bazlı çalışmalar yapması önerilir.",
+            "Mobil uygulama geliştirme (React Native vb.) konusunda temel bilgi edinmesi, gelecekteki projeler için bir avantaj olabilir.",
+            "Daha fazla açık kaynak projeye liderlik yaparak veya karmaşık modüller geliştirerek katkıda bulunmaya devam etmesi teşvik edilir.",
+          ],
+        },
         overallSummary: {
           communication:
             "Aday, teknik konuları net, anlaşılır ve özgüvenli bir şekilde ifade edebilmektedir. Sorulara verdiği yanıtlar derinlemesine ve düşündüğünü göstermektedir. Takım içi iletişimi güçlüdür.",
@@ -280,6 +314,8 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
           conclusion:
             "Mehmet Ali Demir, aranan pozisyonun gerektirdiği tüm temel ve birçok tercih edilen yetkinliğe fazlasıyla sahiptir. Teknik becerileri, problem çözme yaklaşımı ve öğrenme isteği ile ekibe önemli katkılar sağlayacağı değerlendirilmektedir. İşe alımı kesinlikle tavsiye edilir.",
         },
+        interviewNotesRaw:
+          "Aday mülakat boyunca kendinden emin ve sakindi. Teknik sorulara verdiği yanıtlar tatmin ediciydi. Özellikle React performans optimizasyonu konusundaki bilgisi ve tecrübesi etkileyici. STAR metoduyla anlattığı örnekler, yetkinliklerini somutlaştırdı. Ekip çalışmasına ve sürekli öğrenmeye verdiği önem olumlu.",
       };
       setSelectedReport(mockReport);
       setShowReportModal(true);
@@ -376,6 +412,18 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
 
     reportText += `\nGİRİŞ\n--------------------\n${selectedReport.introduction}\n\n`;
 
+    if ((selectedReport as any).experienceAnalysis) {
+      reportText += `\nDENEYİM ANALİZİ\n--------------------\n${
+        (selectedReport as any).experienceAnalysis
+      }\n\n`;
+    }
+
+    if ((selectedReport as any).otherSkills) {
+      reportText += `\nDİĞER YETENEKLER\n--------------------\n${
+        (selectedReport as any).otherSkills
+      }\n\n`;
+    }
+
     reportText += `\nGÜÇLÜ YÖNLER\n--------------------\n`;
     selectedReport.strengths.forEach((strength: string) => {
       reportText += `- ${strength.replace(/\*\*/g, "")}\n`;
@@ -385,6 +433,38 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
     selectedReport.areasForDevelopment.forEach((area: string) => {
       reportText += `- ${area.replace(/\*\*/g, "")}\n`;
     });
+
+    if (
+      (selectedReport as any).starExamples &&
+      (selectedReport as any).starExamples.length > 0
+    ) {
+      reportText += `\nSTAR METODU İLE YETKİNLİK ÖRNEKLERİ\n--------------------\n`;
+      (selectedReport as any).starExamples.forEach((star: any) => {
+        reportText += `Durum (Situation): ${star.situation}\n`;
+        reportText += `Görev (Task): ${star.task}\n`;
+        reportText += `Eylem (Action): ${star.action}\n`;
+        reportText += `Sonuç (Result): ${star.result}\n`;
+        reportText += `Gösterdiği Yetkinlik: ${
+          star.competency || "Belirtilmemiş"
+        }\n\n`;
+      });
+    }
+
+    if ((selectedReport as any).suitabilityAndRecommendations) {
+      reportText += `\nADAYIN UYGUNLUĞU VE TAVSİYELER\n--------------------\n`;
+      reportText += `Uygunluk Durumu: ${
+        (selectedReport as any).suitabilityAndRecommendations.suitabilityStatus
+      }\n`;
+      reportText += `Gelişim Önerileri:\n`;
+      (
+        selectedReport as any
+      ).suitabilityAndRecommendations.developmentSuggestions.forEach(
+        (suggestion: string) => {
+          reportText += `- ${suggestion}\n`;
+        }
+      );
+      reportText += `\n`;
+    }
 
     reportText += `\nGENEL DEĞERLENDİRME\n--------------------\n`;
     reportText += `İletişim Becerileri: ${selectedReport.overallSummary.communication}\n\n`;
@@ -953,6 +1033,32 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
                   </p>
                 </div>
 
+                {/* Deneyim Analizi */}
+                {(selectedReport as any).experienceAnalysis && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-hiri-purple mb-3 border-b-2 border-hiri-purple pb-1">
+                      <FaFileAlt className="mr-2 inline" />
+                      Deneyim Analizi
+                    </h3>
+                    <p className="text-slate-600 leading-relaxed">
+                      {(selectedReport as any).experienceAnalysis}
+                    </p>
+                  </div>
+                )}
+
+                {/* Diğer Yetenekler */}
+                {(selectedReport as any).otherSkills && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-hiri-purple mb-3 border-b-2 border-hiri-purple pb-1">
+                      <FaFileAlt className="mr-2 inline" />
+                      Diğer Yetenekler
+                    </h3>
+                    <p className="text-slate-600 leading-relaxed">
+                      {(selectedReport as any).otherSkills}
+                    </p>
+                  </div>
+                )}
+
                 {/* Güçlü Yönler */}
                 <div>
                   <h3 className="text-lg font-semibold text-hiri-purple mb-3 border-b-2 border-hiri-purple pb-1">
@@ -1009,11 +1115,114 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
                   </ul>
                 </div>
 
+                {/* STAR Metodu ile Yetkinlik Örnekleri */}
+                {(selectedReport as any).starExamples &&
+                  (selectedReport as any).starExamples.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-hiri-purple mb-3 border-b-2 border-hiri-purple pb-1">
+                        <FaFileAlt className="mr-2 inline" />
+                        STAR Metodu ile Yetkinlik Örnekleri
+                      </h3>
+                      <div className="space-y-4">
+                        {(selectedReport as any).starExamples.map(
+                          (star: any, index: number) => (
+                            <div
+                              key={index}
+                              className="p-4 bg-indigo-50 rounded-md border border-indigo-200 shadow-sm"
+                            >
+                              <p className="font-medium text-indigo-700 mb-1">
+                                Durum (Situation):
+                              </p>
+                              <p className="mb-3 text-slate-600">
+                                {star.situation}
+                              </p>
+                              <p className="font-medium text-indigo-700 mb-1">
+                                Görev (Task):
+                              </p>
+                              <p className="mb-3 text-slate-600">{star.task}</p>
+                              <p className="font-medium text-indigo-700 mb-1">
+                                Eylem (Action):
+                              </p>
+                              <p className="mb-3 text-slate-600">
+                                {star.action}
+                              </p>
+                              <p className="font-medium text-indigo-700 mb-1">
+                                Sonuç (Result):
+                              </p>
+                              <p className="mb-3 text-slate-600">
+                                {star.result}
+                              </p>
+                              <p className="font-medium text-purple-700 mt-2">
+                                Gösterdiği Yetkinlik:
+                              </p>
+                              <p className="text-slate-600">
+                                {star.competency || "Belirtilmemiş"}
+                              </p>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                {/* Adayın Uygunluğu ve Tavsiyeler */}
+                {(selectedReport as any).suitabilityAndRecommendations && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-hiri-purple mb-3 border-b-2 border-hiri-purple pb-1">
+                      <FaFileAlt className="mr-2 inline" />
+                      Adayın Uygunluğu ve Tavsiyeler
+                    </h3>
+                    <div className="space-y-3">
+                      <p>
+                        <strong className="text-slate-700">
+                          Uygunluk Durumu:
+                        </strong>
+                        <span
+                          className={`ml-2 font-bold ${
+                            (
+                              selectedReport as any
+                            ).suitabilityAndRecommendations.suitabilityStatus.includes(
+                              "Yüksek"
+                            )
+                              ? "text-green-600"
+                              : (
+                                  selectedReport as any
+                                ).suitabilityAndRecommendations.suitabilityStatus.includes(
+                                  "Değerlendirilebilir"
+                                )
+                              ? "text-yellow-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          {
+                            (selectedReport as any)
+                              .suitabilityAndRecommendations.suitabilityStatus
+                          }
+                        </span>
+                      </p>
+                      <div>
+                        <strong className="text-slate-700">
+                          Gelişim Önerileri:
+                        </strong>
+                        <ul className="list-disc list-inside space-y-1 mt-2 pl-4 text-slate-600">
+                          {(
+                            selectedReport as any
+                          ).suitabilityAndRecommendations.developmentSuggestions.map(
+                            (suggestion: string, index: number) => (
+                              <li key={index}>{suggestion}</li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Genel Değerlendirme */}
                 <div>
                   <h3 className="text-lg font-semibold text-hiri-purple mb-3 border-b-2 border-hiri-purple pb-1">
                     <FaChartBar className="mr-2 inline" />
-                    Genel Değerlendirme ve Özet
+                    Genel Değerlendirme
                   </h3>
                   <div className="space-y-3 bg-slate-50 p-4 rounded-lg border">
                     <p>
@@ -1041,34 +1250,38 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
                   </div>
                 </div>
 
-                {/* Görsel Placeholder */}
+                {/* Görsel Değerlendirmeler */}
                 <div>
                   <h3 className="text-lg font-semibold text-hiri-purple mb-3 border-b-2 border-hiri-purple pb-1">
                     <FaChartBar className="mr-2 inline" />
                     Görsel Değerlendirmeler
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="text-center">
-                      <h4 className="font-semibold text-slate-700 mb-2">
+                    <div>
+                      <h4 className="font-semibold text-slate-700 text-base mb-2">
                         Yetenek Haritası (Örnek)
                       </h4>
-                      <div className="bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg p-8 border-2 border-dashed border-purple-300">
-                        <FaChartBar className="text-6xl text-purple-400 mx-auto mb-2" />
-                        <p className="text-sm text-slate-500">
-                          Adayın temel yetkinliklerinin görsel temsili
-                        </p>
-                      </div>
+                      <img
+                        src="https://placehold.co/600x400/E0E7FF/4338CA?text=Yetenek+Radar+Grafigi%0A(Teknik,+Yumusak+Beceriler)"
+                        alt="Yetenek Haritası Grafiği"
+                        className="w-full h-auto rounded-lg shadow-sm border border-slate-200"
+                      />
+                      <p className="text-xs text-slate-500 mt-2 text-center">
+                        Adayın temel yetkinliklerinin görsel temsili.
+                      </p>
                     </div>
-                    <div className="text-center">
-                      <h4 className="font-semibold text-slate-700 mb-2">
+                    <div>
+                      <h4 className="font-semibold text-slate-700 text-base mb-2">
                         Beceri Bulutu (Örnek)
                       </h4>
-                      <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg p-8 border-2 border-dashed border-blue-300">
-                        <FaFileAlt className="text-6xl text-blue-400 mx-auto mb-2" />
-                        <p className="text-sm text-slate-500">
-                          Mülakatta öne çıkan anahtar kelimeler
-                        </p>
-                      </div>
+                      <img
+                        src="https://placehold.co/600x400/DBEAFE/1D4ED8?text=Beceri+Bulutu%0A(React,+TypeScript,+JavaScript)"
+                        alt="Beceri Bulutu Grafiği"
+                        className="w-full h-auto rounded-lg shadow-sm border border-slate-200"
+                      />
+                      <p className="text-xs text-slate-500 mt-2 text-center">
+                        Mülakatta ve CV'de öne çıkan anahtar kelimeler.
+                      </p>
                     </div>
                   </div>
                 </div>
