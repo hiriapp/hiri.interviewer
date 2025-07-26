@@ -397,20 +397,9 @@ export default function DashboardPage() {
               <DraggableWidget>
                 <Card>
                   <CardHeader className="pb-3 lg:pb-4">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base lg:text-lg">
-                        Kişisel Notlar
-                      </CardTitle>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleCreateNote}
-                        className="text-xs lg:text-sm"
-                      >
-                        <FaPlus className="mr-1 text-xs" />
-                        Not Ekle
-                      </Button>
-                    </div>
+                    <CardTitle className="text-base lg:text-lg">
+                      Kişisel Notlar
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
                     {/* Search and Filter - Compact */}
@@ -535,6 +524,19 @@ export default function DashboardPage() {
                           );
                         })
                       )}
+                    </div>
+
+                    {/* Not Ekle Button - Bottom */}
+                    <div className="mt-3 pt-3 border-t border-slate-200">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCreateNote}
+                        className="w-full text-xs lg:text-sm"
+                      >
+                        <FaPlus className="mr-1 text-xs" />
+                        Not Ekle
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
