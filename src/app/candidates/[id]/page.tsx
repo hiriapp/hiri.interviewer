@@ -9,7 +9,6 @@ import {
   FaArrowLeft,
   FaFileAlt,
   FaSyncAlt,
-  FaVideo,
   FaBolt,
   FaCalendarAlt,
   FaUpload,
@@ -25,6 +24,9 @@ import {
   FaFileImport,
   FaUserPlus,
   FaEye,
+  FaShareAlt,
+  FaLink,
+  FaCopy,
 } from "react-icons/fa";
 import { DUMMY_CANDIDATES } from "@/lib/dummy-data";
 
@@ -96,6 +98,19 @@ export default function CandidateProfilePage() {
   // Notes and Logs state
   const [showNotesLogsAccordion, setShowNotesLogsAccordion] = useState(false);
   const [newNoteText, setNewNoteText] = useState("");
+
+  // Share Profile state
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareEmail, setShareEmail] = useState("");
+  const [shareDuration, setShareDuration] = useState(12);
+  const [generatedLink, setGeneratedLink] = useState("");
+  const [shareableFields, setShareableFields] = useState({
+    cvSummary: true,
+    compatibility: true,
+    personality: true,
+    interviews: true,
+  });
+
   const candidateId = params.id as string;
 
   // Merkezi veri kaynağından aday bilgilerini al
@@ -196,10 +211,6 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
   }, []);
 
   // Mülakat aksiyon fonksiyonları
-  const handleCreateOnDemand = () => {
-    router.push(`/interviews/on-demand/create?candidateId=${candidateId}`);
-  };
-
   const handleInstantInvite = () => {
     setInterviewType("instant");
     setShowInterviewModal(true);
@@ -239,24 +250,55 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
       return;
     }
 
-    // Simulate adding external interview to candidate's data
-    const newInterview = {
-      id: `ext_${Date.now()}`,
-      type: "Dış Mülakat",
-      date: externalInterviewForm.date,
-      time: "",
-      status: "Tamamlandı",
-      notes: externalInterviewForm.notes || "Dış mülakat kaydı eklendi.",
-      hasReport: false,
-      interviewers: externalInterviewForm.interviewers,
-      files: {
-        notes: externalInterviewForm.notesFile?.name,
-        video: externalInterviewForm.videoFile?.name,
-      },
-    };
+    // Add the external interview to candidate's data
+    if (candidate?.interviews) {
+      const newInterview = {
+        id: `ext_${Date.now()}`,
+        type: "Dış Mülakat",
+        date: externalInterviewForm.date,
+        time: "", // External interviews don't have specific time
+        status: "Tamamlandı",
+        notes: externalInterviewForm.notes || "Dış mülakat kaydı eklendi.",
+        hasReport: false,
+        interviewers: externalInterviewForm.interviewers || "",
+        files: {
+          notes: externalInterviewForm.notesFile?.name,
+          video: externalInterviewForm.videoFile?.name,
+        },
+      };
+
+      // Add to interviews array using type assertion
+      (candidate.interviews as any[]).push(newInterview);
+
+      // Add a log entry for the external interview
+      if (candidate?.logs) {
+        (candidate.logs as any[]).unshift({
+          user: "Tuna Can",
+          timestamp:
+            new Date().toLocaleDateString("tr-TR") +
+            " " +
+            new Date().toLocaleTimeString("tr-TR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          action: "Dış mülakat kaydı eklendi.",
+          icon: "fa-upload",
+          color: "bg-green-100 text-green-600",
+        });
+      }
+    }
 
     alert("Dış mülakat kaydı başarıyla eklendi!");
     setShowExternalInterviewModal(false);
+
+    // Reset form
+    setExternalInterviewForm({
+      date: "",
+      interviewers: "",
+      notes: "",
+      notesFile: null,
+      videoFile: null,
+    });
   };
 
   const handleViewReport = (interviewId: string) => {
@@ -400,7 +442,7 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
 
     // Add note to candidate data (in a real app, this would be an API call)
     if (candidate?.notes) {
-      candidate.notes.push({
+      (candidate.notes as any[]).push({
         user: "Tuna Can", // In a real app, this would come from the current user
         timestamp:
           new Date().toLocaleDateString("tr-TR") +
@@ -414,7 +456,7 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
 
       // Add a log entry for the note
       if (candidate?.logs) {
-        candidate.logs.unshift({
+        (candidate.logs as any[]).unshift({
           user: "Tuna Can",
           timestamp:
             new Date().toLocaleDateString("tr-TR") +
@@ -431,6 +473,65 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
     }
 
     setNewNoteText("");
+  };
+
+  const handleShareProfile = () => {
+    if (!candidate) return;
+
+    // Reset form
+    setShareEmail("");
+    setShareDuration(12);
+    setGeneratedLink("");
+
+    // Set shareable fields based on candidate data
+    setShareableFields({
+      cvSummary: true,
+      compatibility: true,
+      personality: !!candidate.personalityInventorySummaryAI,
+      interviews: candidate.interviews.length > 0,
+    });
+
+    setShowShareModal(true);
+  };
+
+  const handleGenerateShareLink = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!shareEmail.trim()) {
+      alert("E-posta adresi gereklidir!");
+      return;
+    }
+
+    // Generate a unique share link (in a real app, this would be handled by the backend)
+    const shareId = crypto.randomUUID().slice(0, 8);
+    const baseUrl = window.location.href.split("?")[0];
+    const link = `${baseUrl}?shareId=${shareId}&duration=${shareDuration}`;
+
+    setGeneratedLink(link);
+
+    // In a real app, you would send this info to the backend to store the share link
+    console.log("Share link generated:", {
+      candidateId: candidate?.id,
+      email: shareEmail,
+      duration: shareDuration,
+      fields: shareableFields,
+      link: link,
+    });
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedLink);
+      alert("Link kopyalandı!");
+    } catch (err) {
+      console.error("Link kopyalanırken hata oluştu:", err);
+      alert("Link kopyalanamadı. Lütfen manuel olarak kopyalayın.");
+    }
+  };
+
+  const openUnifiedChat = () => {
+    // Placeholder for HiriBot chat functionality
+    alert("HiriBot sohbet özelliği yakında eklenecek!");
   };
 
   const handleCompatibilityTooltipShow = (event: React.MouseEvent) => {
@@ -543,7 +644,7 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
             </h1>
             <button
               onClick={() => router.push("/candidates")}
-              className="hiri-button hiri-button-secondary"
+              className="hiri-button hiri-button-secondary text-sm py-2"
             >
               <FaArrowLeft className="mr-2" />
               Aday Listesine Dön
@@ -587,13 +688,29 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
             <p className="text-slate-500 text-sm">{candidate.email}</p>
             <p className="text-slate-500 text-sm">{candidate.phone}</p>
           </div>
-          <button
-            onClick={() => router.push("/candidates")}
-            className="hiri-button hiri-button-secondary"
-          >
-            <FaArrowLeft className="mr-2" />
-            Aday Listesine Dön
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={openUnifiedChat}
+              className="hiri-button hiri-button-primary text-sm py-2"
+            >
+              <FaMagic className="mr-2" />
+              HiriBot ile Sohbet
+            </button>
+            <button
+              onClick={handleShareProfile}
+              className="hiri-button hiri-button-secondary text-sm py-2"
+            >
+              <FaShareAlt className="mr-2" />
+              Profili Paylaş
+            </button>
+            <button
+              onClick={() => router.push("/candidates")}
+              className="hiri-button hiri-button-secondary text-sm py-2"
+            >
+              <FaArrowLeft className="mr-2" />
+              Aday Listesine Dön
+            </button>
+          </div>
         </div>
 
         {/* Ana Kart */}
@@ -652,6 +769,32 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
                     Özeti Güncelle <FaSyncAlt className="inline ml-1" />
                   </button>
                 </div>
+
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-700 mb-3">
+                    Yapay Zeka Kişilik Envanteri Özeti
+                  </h2>
+                  {candidate?.personalityInventorySummaryAI ? (
+                    <p className="text-sm text-slate-600 bg-teal-50 p-4 rounded-lg border border-teal-200 leading-relaxed">
+                      {candidate.personalityInventorySummaryAI}
+                    </p>
+                  ) : (
+                    <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-hiri-purple transition-colors">
+                      <FaFileImport className="mx-auto text-3xl text-slate-400 mb-2" />
+                      <p className="text-sm text-slate-600 font-medium">
+                        Kişilik Envanteri Yükle
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        PDF, DOCX dosyası yükleyerek kişilik analizi yapın
+                      </p>
+                      <button className="hiri-button hiri-button-secondary text-xs mt-3">
+                        <FaUpload className="mr-2" />
+                        Dosya Seç
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <h2 className="text-xl font-semibold text-slate-700 mb-3">
                     Yüklenen CV
@@ -759,15 +902,8 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
             <div className="space-y-5">
               <div className="flex flex-wrap gap-3">
                 <button
-                  onClick={handleCreateOnDemand}
-                  className="hiri-button hiri-button-primary"
-                >
-                  <FaVideo className="mr-2" />
-                  On-Demand Mülakat Oluştur
-                </button>
-                <button
                   onClick={handleInstantInvite}
-                  className="hiri-button hiri-button-secondary"
+                  className="hiri-button hiri-button-primary"
                 >
                   <FaBolt className="mr-2" />
                   HiriBot&apos;u Anlık Davet Et
@@ -804,13 +940,47 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
                       className="p-4 border rounded-lg bg-white hover:shadow-md transition-shadow"
                     >
                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                        <div className="mb-3 sm:mb-0">
+                        <div className="mb-3 sm:mb-0 flex-grow">
                           <p className="font-semibold text-slate-700 text-base">
-                            {interview.date} {interview.time} - {interview.type}
+                            {interview.date}{" "}
+                            {interview.time && `${interview.time} -`}{" "}
+                            {interview.type}
                           </p>
                           <p className="text-xs text-slate-500 mt-1">
-                            {interview.notes.substring(0, 70)}...
+                            {interview.notes.length > 70
+                              ? `${interview.notes.substring(0, 70)}...`
+                              : interview.notes}
                           </p>
+
+                          {/* Additional info for external interviews */}
+                          {interview.type === "Dış Mülakat" &&
+                            (interview as any).interviewers && (
+                              <p className="text-xs text-slate-600 mt-1">
+                                <span className="font-medium">
+                                  Mülakatçılar:
+                                </span>{" "}
+                                {(interview as any).interviewers}
+                              </p>
+                            )}
+
+                          {/* File attachments for external interviews */}
+                          {interview.type === "Dış Mülakat" &&
+                            (interview as any).files && (
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {(interview as any).files.notes && (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                    <FaFileAlt className="mr-1" />
+                                    {(interview as any).files.notes}
+                                  </span>
+                                )}
+                                {(interview as any).files.video && (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                                    <FaUpload className="mr-1" />
+                                    {(interview as any).files.video}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
                           {interview.hasReport && (
@@ -921,6 +1091,8 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
                               return <FaUserPlus />;
                             case "fa-eye":
                               return <FaEye />;
+                            case "fa-upload":
+                              return <FaUpload />;
                             default:
                               return <FaHistory />;
                           }
@@ -1818,7 +1990,7 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
                       />
                       <div className="hiri-input flex items-center justify-center p-4 border-2 border-dashed border-slate-300 hover:border-hiri-purple transition-colors cursor-pointer">
                         <div className="text-center">
-                          <FaVideo className="mx-auto text-2xl text-slate-400 mb-2" />
+                          <FaUpload className="mx-auto text-2xl text-slate-400 mb-2" />
                           <p className="text-sm text-slate-600">
                             {externalInterviewForm.videoFile
                               ? externalInterviewForm.videoFile.name
@@ -1837,6 +2009,218 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
                     >
                       <FaUpload className="mr-2" />
                       Dış Mülakat Kaydını Ekle
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </ModalPortal>
+      )}
+
+      {/* Share Profile Modal Portal */}
+      {showShareModal && (
+        <ModalPortal>
+          <div
+            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4"
+            style={{ zIndex: 9999 }}
+            onClick={() => setShowShareModal(false)}
+          >
+            <div
+              className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex justify-between items-center p-6 border-b border-slate-200">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-700">
+                    Aday Profilini Paylaş
+                  </h2>
+                  <p className="text-sm text-slate-500 mt-1">
+                    {candidate?.name} {candidate?.surname} adlı adayın profilini
+                    paylaşıyorsunuz.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowShareModal(false)}
+                  className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Form - Scrollable Content */}
+              <div
+                className="overflow-y-auto"
+                style={{ height: "calc(85vh - 140px)" }}
+              >
+                <form
+                  onSubmit={handleGenerateShareLink}
+                  className="p-6 space-y-6"
+                >
+                  {/* Shareable Fields */}
+                  <div>
+                    <label className="block text-base font-semibold mb-3">
+                      Paylaşılacak Alanlar
+                    </label>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                      <div className="flex items-center">
+                        <input
+                          id="share_cvSummary"
+                          type="checkbox"
+                          checked={shareableFields.cvSummary}
+                          onChange={(e) =>
+                            setShareableFields((prev) => ({
+                              ...prev,
+                              cvSummary: e.target.checked,
+                            }))
+                          }
+                          className="h-4 w-4 text-hiri-purple rounded border-gray-300 focus:ring-hiri-purple"
+                        />
+                        <label
+                          htmlFor="share_cvSummary"
+                          className="ml-3 text-sm"
+                        >
+                          CV Özeti
+                        </label>
+                      </div>
+
+                      <div className="flex items-center">
+                        <input
+                          id="share_compatibility"
+                          type="checkbox"
+                          checked={shareableFields.compatibility}
+                          onChange={(e) =>
+                            setShareableFields((prev) => ({
+                              ...prev,
+                              compatibility: e.target.checked,
+                            }))
+                          }
+                          className="h-4 w-4 text-hiri-purple rounded border-gray-300 focus:ring-hiri-purple"
+                        />
+                        <label
+                          htmlFor="share_compatibility"
+                          className="ml-3 text-sm"
+                        >
+                          Uyumluluk Skoru
+                        </label>
+                      </div>
+
+                      {candidate?.personalityInventorySummaryAI && (
+                        <div className="flex items-center">
+                          <input
+                            id="share_personality"
+                            type="checkbox"
+                            checked={shareableFields.personality}
+                            onChange={(e) =>
+                              setShareableFields((prev) => ({
+                                ...prev,
+                                personality: e.target.checked,
+                              }))
+                            }
+                            className="h-4 w-4 text-hiri-purple rounded border-gray-300 focus:ring-hiri-purple"
+                          />
+                          <label
+                            htmlFor="share_personality"
+                            className="ml-3 text-sm"
+                          >
+                            Kişilik Envanteri
+                          </label>
+                        </div>
+                      )}
+
+                      {candidate?.interviews &&
+                        candidate.interviews.length > 0 && (
+                          <div className="flex items-center">
+                            <input
+                              id="share_interviews"
+                              type="checkbox"
+                              checked={shareableFields.interviews}
+                              onChange={(e) =>
+                                setShareableFields((prev) => ({
+                                  ...prev,
+                                  interviews: e.target.checked,
+                                }))
+                              }
+                              className="h-4 w-4 text-hiri-purple rounded border-gray-300 focus:ring-hiri-purple"
+                            />
+                            <label
+                              htmlFor="share_interviews"
+                              className="ml-3 text-sm"
+                            >
+                              Mülakatlar
+                            </label>
+                          </div>
+                        )}
+                    </div>
+                  </div>
+
+                  {/* Email and Duration */}
+                  <div className="border-t pt-6 space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-600 mb-2">
+                        E-posta*
+                      </label>
+                      <input
+                        type="email"
+                        value={shareEmail}
+                        onChange={(e) => setShareEmail(e.target.value)}
+                        className="hiri-input"
+                        placeholder="paylasilacak@email.com"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-600 mb-2">
+                        Link Geçerlilik Süresi (Saat)
+                      </label>
+                      <input
+                        type="number"
+                        value={shareDuration}
+                        onChange={(e) =>
+                          setShareDuration(Number(e.target.value))
+                        }
+                        className="hiri-input w-32"
+                        min="1"
+                        max="168"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Generated Link */}
+                  {generatedLink && (
+                    <div className="border-t pt-4">
+                      <label className="block text-sm font-medium text-slate-600 mb-2">
+                        Oluşturulan Paylaşım Linki
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={generatedLink}
+                          readOnly
+                          className="hiri-input bg-slate-100 text-slate-600 flex-1"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleCopyLink}
+                          className="hiri-button hiri-button-secondary px-4 flex-shrink-0"
+                        >
+                          <FaCopy className="mr-2" />
+                          Kopyala
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <div className="flex justify-end pt-4">
+                    <button
+                      type="submit"
+                      className="hiri-button hiri-button-primary"
+                    >
+                      <FaLink className="mr-2" />
+                      Link Oluştur
                     </button>
                   </div>
                 </form>

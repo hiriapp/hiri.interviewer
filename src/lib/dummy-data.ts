@@ -13,6 +13,7 @@ export const DUMMY_CANDIDATES = [
       "Yapay zeka/makine öğrenmesi konseptlerine temel aşinalık belirtilmiş, daha fazla pratik uygulama fayda sağlayabilir."
     ],
     cvSummary: "Mehmet Ali Demir, React ve TypeScript odaklı 7+ yıl deneyime sahip kıdemli bir frontend geliştiricidir. Büyük ölçekli SaaS projelerinde çalışmış, performans optimizasyonu, UI/UX ve teknik liderlik konularında tecrübelidir. React Flow ve AI destekli geliştirme gibi modern teknolojilere hakimdir.",
+    personalityInventorySummaryAI: "DISC analizine göre, aday 'Dominant' ve 'Conscientious' (Vicdanlı) profillerine yüksek yatkınlık göstermektedir. Sonuç odaklı, kararlı ve analitik bir yapıya sahiptir.",
     cvText: `MEHMET ALİ DEMİR
 mehmetalidemir@example.com | 0555 123 4567 | Istanbul
 
@@ -108,6 +109,7 @@ SERTİFİKALAR
       "Karmaşık UI ve etkileşim problemlerini çözme konusunda daha fazla örnek sunması beklenebilir."
     ],
     cvSummary: "Çağdaş Ozan Pamuk, 5 yıllık React deneyimine sahip bir frontend geliştiricidir. State management (Redux) ve API entegrasyonları konularında tecrübelidir. Agile ortamlarda çalışmış, takım oyuncusu ve TypeScript öğrenmeye isteklidir.",
+    personalityInventorySummaryAI: null, // Kişilik envanteri henüz yüklenmemiş
     cvText: `ÇAĞDAŞ OZAN PAMUK
 cozanpamuk@example.com | Istanbul
 
@@ -170,6 +172,7 @@ EĞİTİM
       "Bazı spesifik pazarlama otomasyon araçları hakkında daha fazla pratik deneyim faydalı olabilir."
     ],
     cvSummary: "Gamze Nur Bayrak, yeni mezun bir pazarlama adayıdır. Dijital pazarlama, içerik üretimi ve sosyal medya konularında staj deneyimi ve güçlü teorik bilgiye sahiptir. Öğrenmeye açık, motive ve iyi iletişim becerilerine sahip bir profili vardır.",
+    personalityInventorySummaryAI: null, // Kişilik envanteri henüz yüklenmemiş
     cvText: `GAMZE NUR BAYRAK
 gamzenurb@example.com | Ankara
 
