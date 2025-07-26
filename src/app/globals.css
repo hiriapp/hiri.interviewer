@@ -420,4 +420,53 @@
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
+
+  /* Drag and Drop Styles */
+  .dashboard-widget {
+    @apply relative;
+  }
+
+  .drag-handle {
+    @apply absolute cursor-grab text-gray-400 p-2 rounded-md transition-colors duration-200;
+  }
+
+  .drag-handle:hover {
+    @apply bg-gray-100 text-gray-600;
+  }
+
+  .drag-handle:active {
+    @apply cursor-grabbing;
+  }
+
+  /* SortableJS Classes */
+  .sortable-ghost {
+    @apply bg-purple-50 border-2 border-dashed border-hiri-purple opacity-70 rounded-xl;
+  }
+
+  .sortable-ghost > * {
+    visibility: hidden;
+  }
+
+  .sortable-chosen {
+    @apply cursor-grabbing shadow-lg;
+    box-shadow: 0 10px 25px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  }
+
+  .sortable-drag {
+    @apply opacity-60;
+  }
+
+  .sortable-fallback {
+    @apply opacity-40;
+  }
+
+  /* Drag animations */
+  @keyframes drag-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+
+  .dragging {
+    animation: drag-pulse 1s ease-in-out infinite;
+  }
 }

@@ -10,6 +10,11 @@ import { Footer } from "@/components/layout/Footer";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import {
+  DraggableContainer,
+  DraggableWidget,
+  InviteHiriBot,
+} from "@/components/ui";
+import {
   FaUsers,
   FaBriefcase,
   FaCalendarAlt,
@@ -41,6 +46,12 @@ const upcomingInterviews = [
   },
 ];
 
+const unassignedInterviews = [
+  { id: "ui1", date: "15.01.2025 14:30", duration: "28dk" },
+  { id: "ui2", date: "15.01.2025 11:15", duration: "35dk" },
+  { id: "ui3", date: "14.01.2025 16:45", duration: "22dk" },
+];
+
 interface Note {
   id: string;
   title: string;
@@ -70,6 +81,7 @@ export default function DashboardPage() {
   const { status } = useSession();
   const router = useRouter();
   const [currentView, setCurrentView] = useState("dashboard");
+  const [unassignedData, setUnassignedData] = useState(unassignedInterviews);
   const [notes, setNotes] = useState<Note[]>([
     {
       id: "1",
@@ -208,6 +220,37 @@ export default function DashboardPage() {
     setNoteForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  // InviteHiriBot handlers
+  const handleInvite = (link: string) => {
+    console.log("🚀 HiriBot davet edildi:", link);
+    // Simulate adding new unassigned interview
+    const newInterview = {
+      id: `ui${Date.now()}`,
+      date: new Date().toLocaleString("tr-TR"),
+      duration: "30dk",
+    };
+    setUnassignedData((prev) => [newInterview, ...prev]);
+  };
+
+  const handleAssignCandidate = (interviewId: string) => {
+    console.log("👤 Aday atama:", interviewId);
+    // Remove from unassigned list
+    setUnassignedData((prev) =>
+      prev.filter((interview) => interview.id !== interviewId)
+    );
+  };
+
+  // Drag handler
+  const handleDragEnd = (event: any) => {
+    console.log("🔄 Widget taşındı:", {
+      from: event.from.id,
+      to: event.to.id,
+      oldIndex: event.oldIndex,
+      newIndex: event.newIndex,
+    });
+    // Here you can save layout to localStorage or backend
+  };
+
   // Filter notes
   const filteredNotes = notes.filter((note) => {
     const matchesSearch =
@@ -230,241 +273,273 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
             {/* Main Content - HiriBot and Quick Actions */}
-            <div className="lg:col-span-2 space-y-4 lg:space-y-6">
-              <HiriBotChat />
+            <DraggableContainer
+              id="main-column"
+              className="lg:col-span-2"
+              draggableOptions={{
+                group: "dashboard-widgets",
+                onEnd: handleDragEnd,
+              }}
+            >
+              <DraggableWidget>
+                <HiriBotChat />
+              </DraggableWidget>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-                <Card
-                  variant="compact"
-                  className="text-center hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                >
-                  <div className="flex flex-col items-center justify-center p-4 lg:p-6">
-                    <FaUsers className="text-3xl sm:text-4xl lg:text-5xl text-purple-600 mb-3 lg:mb-4" />
-                    <h2 className="text-base lg:text-lg font-semibold text-slate-700 mb-1">
-                      Aday Yönetimi
-                    </h2>
-                    <p className="text-xs text-slate-500 mb-2 lg:mb-3 px-2">
-                      Adaylarınızı görüntüleyin ve yönetin
-                    </p>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => router.push("/candidates")}
-                    >
-                      Adaylara Git
-                    </Button>
-                  </div>
-                </Card>
+              <DraggableWidget>
+                <InviteHiriBot
+                  onInvite={handleInvite}
+                  onAssignCandidate={handleAssignCandidate}
+                  unassignedInterviews={unassignedData}
+                />
+              </DraggableWidget>
 
-                <Card
-                  variant="compact"
-                  className="text-center hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                >
-                  <div className="flex flex-col items-center justify-center p-4 lg:p-6">
-                    <FaBriefcase className="text-3xl sm:text-4xl lg:text-5xl text-blue-500 mb-3 lg:mb-4" />
-                    <h2 className="text-base lg:text-lg font-semibold text-slate-700 mb-1">
-                      Pozisyon Yönetimi
-                    </h2>
-                    <p className="text-xs text-slate-500 mb-2 lg:mb-3 px-2">
-                      İş pozisyonları oluşturun ve yönetin
-                    </p>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => router.push("/positions")}
-                    >
-                      Pozisyonlara Git
-                    </Button>
-                  </div>
-                </Card>
-              </div>
-            </div>
+              <DraggableWidget>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+                  <Card
+                    variant="compact"
+                    className="text-center hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                  >
+                    <div className="flex flex-col items-center justify-center p-4 lg:p-6">
+                      <FaUsers className="text-3xl sm:text-4xl lg:text-5xl text-purple-600 mb-3 lg:mb-4" />
+                      <h2 className="text-base lg:text-lg font-semibold text-slate-700 mb-1">
+                        Aday Yönetimi
+                      </h2>
+                      <p className="text-xs text-slate-500 mb-2 lg:mb-3 px-2">
+                        Adaylarınızı görüntüleyin ve yönetin
+                      </p>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => router.push("/candidates")}
+                      >
+                        Adaylara Git
+                      </Button>
+                    </div>
+                  </Card>
+
+                  <Card
+                    variant="compact"
+                    className="text-center hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                  >
+                    <div className="flex flex-col items-center justify-center p-4 lg:p-6">
+                      <FaBriefcase className="text-3xl sm:text-4xl lg:text-5xl text-blue-500 mb-3 lg:mb-4" />
+                      <h2 className="text-base lg:text-lg font-semibold text-slate-700 mb-1">
+                        Pozisyon Yönetimi
+                      </h2>
+                      <p className="text-xs text-slate-500 mb-2 lg:mb-3 px-2">
+                        İş pozisyonları oluşturun ve yönetin
+                      </p>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => router.push("/positions")}
+                      >
+                        Pozisyonlara Git
+                      </Button>
+                    </div>
+                  </Card>
+                </div>
+              </DraggableWidget>
+            </DraggableContainer>
 
             {/* Sidebar Content */}
-            <div className="space-y-4 lg:space-y-6">
+            <DraggableContainer
+              id="sidebar-column"
+              className="lg:col-span-1"
+              draggableOptions={{
+                group: "dashboard-widgets",
+                onEnd: handleDragEnd,
+              }}
+            >
               {/* Upcoming Interviews */}
-              <Card>
-                <CardHeader className="pb-3 lg:pb-4">
-                  <CardTitle className="flex items-center text-base lg:text-lg">
-                    <FaCalendarAlt className="mr-2 text-hiri-purple text-sm lg:text-base" />
-                    Yaklaşan Mülakatlar
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  {upcomingInterviews.length === 0 ? (
-                    <p className="text-xs text-slate-500 italic">
-                      Yaklaşan mülakat bulunmuyor.
-                    </p>
-                  ) : (
-                    <div className="space-y-2 lg:space-y-3">
-                      {upcomingInterviews.map((interview) => (
-                        <div
-                          key={interview.id}
-                          className="border-l-4 border-purple-400 pl-2 lg:pl-3 py-2 bg-purple-50 rounded-r"
-                        >
-                          <h3 className="text-xs lg:text-sm font-semibold text-slate-800">
-                            {interview.candidateName}
-                          </h3>
-                          <p className="text-xs text-slate-600">
-                            {interview.position}
-                          </p>
-                          <div className="flex items-center text-xs text-slate-500 mt-1">
-                            <FaClock className="mr-1 text-xs" />
-                            {new Date(interview.date).toLocaleDateString(
-                              "tr-TR"
-                            )}{" "}
-                            - {interview.time}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Enhanced Personal Notes */}
-              <Card>
-                <CardHeader className="pb-3 lg:pb-4">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base lg:text-lg">
-                      Kişisel Notlar
+              <DraggableWidget>
+                <Card>
+                  <CardHeader className="pb-3 lg:pb-4">
+                    <CardTitle className="flex items-center text-base lg:text-lg">
+                      <FaCalendarAlt className="mr-2 text-hiri-purple text-sm lg:text-base" />
+                      Yaklaşan Mülakatlar
                     </CardTitle>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleCreateNote}
-                      className="text-xs lg:text-sm"
-                    >
-                      <FaPlus className="mr-1 text-xs" />
-                      Not Ekle
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  {/* Search and Filter - Compact */}
-                  <div className="mb-3 flex gap-2">
-                    <div className="relative flex-1">
-                      <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Ara..."
-                        className="w-full pl-7 pr-2 py-1.5 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-1 focus:ring-hiri-purple focus:border-transparent"
-                      />
-                    </div>
-                    <select
-                      value={filterCategory}
-                      onChange={(e) =>
-                        setFilterCategory(
-                          e.target.value as keyof typeof categoryConfig | "all"
-                        )
-                      }
-                      className="text-xs py-1.5 px-3 pr-10 border border-slate-300 rounded-md focus:outline-none focus:ring-1 focus:ring-hiri-purple focus:border-transparent w-24 flex-shrink-0 appearance-none bg-white"
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                        backgroundPosition: "right 8px center",
-                        backgroundRepeat: "no-repeat",
-                        backgroundSize: "14px",
-                      }}
-                    >
-                      <option value="all">Tümü</option>
-                      {Object.entries(categoryConfig).map(([key, config]) => (
-                        <option key={key} value={key}>
-                          {config.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Notes List */}
-                  <div className="space-y-2 max-h-72 overflow-y-auto">
-                    {filteredNotes.length === 0 ? (
-                      <p className="text-xs text-slate-500 italic text-center py-4">
-                        {searchQuery || filterCategory !== "all"
-                          ? "Arama kriterlerinize uygun not bulunamadı."
-                          : "Henüz not eklenmedi."}
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    {upcomingInterviews.length === 0 ? (
+                      <p className="text-xs text-slate-500 italic">
+                        Yaklaşan mülakat bulunmuyor.
                       </p>
                     ) : (
-                      filteredNotes.map((note) => {
-                        const categoryInfo = categoryConfig[note.category];
-                        const priorityInfo = priorityConfig[note.priority];
-                        const CategoryIcon = categoryInfo.icon;
-
-                        return (
+                      <div className="space-y-2 lg:space-y-3">
+                        {upcomingInterviews.map((interview) => (
                           <div
-                            key={note.id}
-                            className="group relative p-3 border rounded-lg hover:shadow-md transition-all duration-200 cursor-pointer"
-                            style={{
-                              borderLeftColor: note.color,
-                              borderLeftWidth: "4px",
-                            }}
+                            key={interview.id}
+                            className="border-l-4 border-purple-400 pl-2 lg:pl-3 py-2 bg-purple-50 rounded-r"
                           >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                  <CategoryIcon
-                                    className="text-xs flex-shrink-0"
-                                    style={{ color: categoryInfo.color }}
-                                  />
-                                  <h4 className="text-xs font-medium text-slate-800 truncate min-w-0 flex-1">
-                                    {note.title}
-                                  </h4>
-                                  <span
-                                    className="text-xs px-1.5 py-0.5 rounded-full text-white font-medium flex-shrink-0"
-                                    style={{
-                                      backgroundColor: priorityInfo.color,
-                                    }}
-                                  >
-                                    {priorityInfo.label}
-                                  </span>
-                                  <span className="text-xs px-1.5 py-0.5 bg-slate-200 text-slate-600 rounded-full flex-shrink-0">
-                                    {note.updatedAt.toLocaleDateString(
-                                      "tr-TR",
-                                      {
-                                        day: "2-digit",
-                                        month: "2-digit",
-                                      }
-                                    )}
-                                  </span>
-                                </div>
-                                <p className="text-xs text-slate-600 line-clamp-2 mb-1">
-                                  {note.content}
-                                </p>
-                                <div className="text-xs text-slate-400">
-                                  <span>{categoryInfo.label}</span>
-                                </div>
-                              </div>
-
-                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleEditNote(note);
-                                  }}
-                                  className="p-1 text-slate-400 hover:text-blue-600 transition-colors"
-                                >
-                                  <FaEdit className="text-xs" />
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteNote(note.id);
-                                  }}
-                                  className="p-1 text-slate-400 hover:text-red-600 transition-colors"
-                                >
-                                  <FaTimes className="text-xs" />
-                                </button>
-                              </div>
+                            <h3 className="text-xs lg:text-sm font-semibold text-slate-800">
+                              {interview.candidateName}
+                            </h3>
+                            <p className="text-xs text-slate-600">
+                              {interview.position}
+                            </p>
+                            <div className="flex items-center text-xs text-slate-500 mt-1">
+                              <FaClock className="mr-1 text-xs" />
+                              {new Date(interview.date).toLocaleDateString(
+                                "tr-TR"
+                              )}{" "}
+                              - {interview.time}
                             </div>
                           </div>
-                        );
-                      })
+                        ))}
+                      </div>
                     )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  </CardContent>
+                </Card>
+              </DraggableWidget>
+
+              {/* Enhanced Personal Notes */}
+              <DraggableWidget>
+                <Card>
+                  <CardHeader className="pb-3 lg:pb-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base lg:text-lg">
+                        Kişisel Notlar
+                      </CardTitle>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCreateNote}
+                        className="text-xs lg:text-sm"
+                      >
+                        <FaPlus className="mr-1 text-xs" />
+                        Not Ekle
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    {/* Search and Filter - Compact */}
+                    <div className="mb-3 flex gap-2">
+                      <div className="relative flex-1">
+                        <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Ara..."
+                          className="w-full pl-7 pr-2 py-1.5 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-1 focus:ring-hiri-purple focus:border-transparent"
+                        />
+                      </div>
+                      <select
+                        value={filterCategory}
+                        onChange={(e) =>
+                          setFilterCategory(
+                            e.target.value as
+                              | keyof typeof categoryConfig
+                              | "all"
+                          )
+                        }
+                        className="text-xs py-1.5 px-3 pr-10 border border-slate-300 rounded-md focus:outline-none focus:ring-1 focus:ring-hiri-purple focus:border-transparent w-24 flex-shrink-0 appearance-none bg-white"
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                          backgroundPosition: "right 8px center",
+                          backgroundRepeat: "no-repeat",
+                          backgroundSize: "14px",
+                        }}
+                      >
+                        <option value="all">Tümü</option>
+                        {Object.entries(categoryConfig).map(([key, config]) => (
+                          <option key={key} value={key}>
+                            {config.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Notes List */}
+                    <div className="space-y-2 max-h-72 overflow-y-auto">
+                      {filteredNotes.length === 0 ? (
+                        <p className="text-xs text-slate-500 italic text-center py-4">
+                          {searchQuery || filterCategory !== "all"
+                            ? "Arama kriterlerinize uygun not bulunamadı."
+                            : "Henüz not eklenmedi."}
+                        </p>
+                      ) : (
+                        filteredNotes.map((note) => {
+                          const categoryInfo = categoryConfig[note.category];
+                          const priorityInfo = priorityConfig[note.priority];
+                          const CategoryIcon = categoryInfo.icon;
+
+                          return (
+                            <div
+                              key={note.id}
+                              className="group relative p-3 border rounded-lg hover:shadow-md transition-all duration-200 cursor-pointer"
+                              style={{
+                                borderLeftColor: note.color,
+                                borderLeftWidth: "4px",
+                              }}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                    <CategoryIcon
+                                      className="text-xs flex-shrink-0"
+                                      style={{ color: categoryInfo.color }}
+                                    />
+                                    <h4 className="text-xs font-medium text-slate-800 truncate min-w-0 flex-1">
+                                      {note.title}
+                                    </h4>
+                                    <span
+                                      className="text-xs px-1.5 py-0.5 rounded-full text-white font-medium flex-shrink-0"
+                                      style={{
+                                        backgroundColor: priorityInfo.color,
+                                      }}
+                                    >
+                                      {priorityInfo.label}
+                                    </span>
+                                    <span className="text-xs px-1.5 py-0.5 bg-slate-200 text-slate-600 rounded-full flex-shrink-0">
+                                      {note.updatedAt.toLocaleDateString(
+                                        "tr-TR",
+                                        {
+                                          day: "2-digit",
+                                          month: "2-digit",
+                                        }
+                                      )}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-slate-600 line-clamp-2 mb-1">
+                                    {note.content}
+                                  </p>
+                                  <div className="text-xs text-slate-400">
+                                    <span>{categoryInfo.label}</span>
+                                  </div>
+                                </div>
+
+                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleEditNote(note);
+                                    }}
+                                    className="p-1 text-slate-400 hover:text-blue-600 transition-colors"
+                                  >
+                                    <FaEdit className="text-xs" />
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteNote(note.id);
+                                    }}
+                                    className="p-1 text-slate-400 hover:text-red-600 transition-colors"
+                                  >
+                                    <FaTimes className="text-xs" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </DraggableWidget>
+            </DraggableContainer>
           </div>
         </div>
       </main>
