@@ -373,6 +373,153 @@ POST /api/ai/chat                    # AI sohbet
 
 ---
 
+## 💬 HiriBot Chat Sessions (Konuşma Oturumları)
+
+### Chat Session Endpoints
+
+```http
+GET    /api/chat/sessions                    # Kullanıcının chat oturumları
+GET    /api/chat/sessions/{id}               # Belirli oturum detayı
+POST   /api/chat/sessions                    # Yeni oturum oluştur
+PUT    /api/chat/sessions/{id}               # Oturum güncelle (başlık, vb.)
+DELETE /api/chat/sessions/{id}               # Oturum sil
+POST   /api/chat/sessions/{id}/messages      # Oturuma mesaj ekle
+GET    /api/chat/sessions/{id}/messages      # Oturum mesajları
+DELETE /api/chat/sessions/{id}/messages/{msgId} # Mesaj sil
+```
+
+### Chat Session Models
+
+#### Chat Session Model
+
+```json
+{
+  "id": "string",
+  "userId": "string", // Oturum sahibi
+  "title": "string", // Oturum başlığı (ilk mesajdan otomatik oluşturulur)
+  "messageCount": "number", // Toplam mesaj sayısı
+  "lastMessageAt": "datetime", // Son mesaj zamanı
+  "createdAt": "datetime",
+  "updatedAt": "datetime",
+  "isActive": "boolean" // Aktif oturum kontrolü
+}
+```
+
+#### Chat Message Model
+
+```json
+{
+  "id": "string",
+  "sessionId": "string",
+  "type": "user" | "assistant",
+  "content": "string",
+  "metadata": {
+    "tokens": "number", // opsiyonel, AI response için
+    "processingTime": "number", // ms, AI response süresi
+    "context": "object" // opsiyonel, chat context bilgisi
+  },
+  "timestamp": "datetime",
+  "editedAt": "datetime", // opsiyonel, mesaj düzenlendiyse
+  "isDeleted": "boolean"
+}
+```
+
+#### Create Session Request
+
+```json
+{
+  "title": "string", // opsiyonel, verilmezse ilk mesajdan oluşturulur
+  "initialMessage": {
+    "content": "string",
+    "type": "user"
+  } // opsiyonel
+}
+```
+
+#### Create Session Response
+
+```json
+{
+  "sessionId": "string",
+  "title": "string",
+  "createdAt": "datetime",
+  "firstMessageId": "string" // eğer initialMessage varsa
+}
+```
+
+#### Update Session Request
+
+```json
+{
+  "title": "string", // Sadece başlık güncellenebilir
+  "isActive": "boolean" // Oturum aktiflik durumu
+}
+```
+
+#### Add Message Request
+
+```json
+{
+  "content": "string",
+  "type": "user" | "assistant",
+  "context": {
+    "candidateId": "string", // opsiyonel
+    "interviewId": "string", // opsiyonel
+    "analysisType": "string" // opsiyonel: "cv", "interview", "general"
+  }
+}
+```
+
+#### Add Message Response
+
+```json
+{
+  "messageId": "string",
+  "aiResponse": {
+    "messageId": "string",
+    "content": "string",
+    "processingTime": "number",
+    "timestamp": "datetime"
+  } // user message ise AI response da döner
+}
+```
+
+#### Session List Response
+
+```json
+{
+  "sessions": [
+    {
+      "id": "string",
+      "title": "string",
+      "messageCount": "number",
+      "lastMessageAt": "datetime",
+      "createdAt": "datetime",
+      "lastMessage": {
+        "type": "user" | "assistant",
+        "content": "string", // İlk 100 karakter
+        "timestamp": "datetime"
+      }
+    }
+  ],
+  "totalCount": "number",
+  "page": "number",
+  "limit": "number"
+}
+```
+
+### Chat Session Query Parameters
+
+```http
+# Session listesi için
+GET /api/chat/sessions?page=1&limit=20&sortBy=lastMessageAt&order=desc
+
+# Session mesajları için
+GET /api/chat/sessions/{id}/messages?page=1&limit=50&before=messageId&after=messageId
+```
+
+---
+
 ## 🎬 HiriBot Integration
 
 ### HiriBot Endpoints
@@ -449,7 +596,7 @@ DELETE /api/files/{id}              # Dosya sil
 ### Global Search
 
 ```http
-GET /api/search?q=mehmet&type=candidates,positions&limit=10
+GET /api/search?q=mehmet&type=candidates,positions,sessions&limit=10
 ```
 
 ### Search Response
@@ -469,6 +616,14 @@ GET /api/search?q=mehmet&type=candidates,positions&limit=10
     {
       "id": "string",
       "title": "string",
+      "relevanceScore": "number"
+    }
+  ],
+  "chatSessions": [
+    {
+      "id": "string",
+      "title": "string",
+      "lastMessageAt": "datetime",
       "relevanceScore": "number"
     }
   ]
@@ -502,6 +657,14 @@ GET /api/search?q=mehmet&type=candidates,positions&limit=10
 - `question.time`: 30-600 seconds
 - `question.thinkTime`: 0-120 seconds
 
+#### Chat Session
+
+- `title`: 1-200 characters
+- `message.content`: 1-10000 characters
+- Max 100 active sessions per user
+- Max 1000 messages per session
+- Auto-delete sessions after 90 days of inactivity
+
 ---
 
 ## 🚨 Error Handling
@@ -529,6 +692,8 @@ GET /api/search?q=mehmet&type=candidates,positions&limit=10
 - `FILE_TOO_LARGE`: 413
 - `UNSUPPORTED_FILE_TYPE`: 415
 - `RATE_LIMIT_EXCEEDED`: 429
+- `SESSION_LIMIT_EXCEEDED`: 429 (too many active sessions)
+- `MESSAGE_LIMIT_EXCEEDED`: 429 (too many messages in session)
 - `INTERNAL_SERVER_ERROR`: 500
 - `AI_SERVICE_UNAVAILABLE`: 503
 
@@ -577,6 +742,20 @@ ws.on("notification", {
   message: "string",
   data: "object",
 });
+
+// Chat session güncellemeleri
+ws.on("chat_session_update", {
+  sessionId: "string",
+  type: "message_added" | "session_updated" | "session_deleted",
+  data: "object",
+  timestamp: "datetime",
+});
+
+// AI typing indicator
+ws.on("ai_typing", {
+  sessionId: "string",
+  isTyping: "boolean",
+});
 ```
 
 ---
@@ -613,6 +792,11 @@ SMTP_HOST=
 SMTP_PORT=
 SMTP_USER=
 SMTP_PASS=
+
+# Chat Configuration
+CHAT_SESSION_LIMIT_PER_USER=100
+CHAT_MESSAGE_LIMIT_PER_SESSION=1000
+CHAT_SESSION_TTL_DAYS=90
 ```
 
 ---
@@ -622,17 +806,22 @@ SMTP_PASS=
 ### Performance Considerations
 
 - CV analizi işlemleri asenkron olarak yapılmalı
+- Chat sessions için pagination ve lazy loading
+- AI responses için caching stratejisi
 - Büyük dosya yüklemeleri için progress tracking
 - Rate limiting: 100 requests/minute per user
-- Database indexing: email, candidateId, positionId, createdAt
+- Database indexing: email, candidateId, positionId, createdAt, sessionId, userId
 
 ### Security Requirements
 
 - JWT token expiration: 24 hours
+- Chat session access kontrolü (sadece oturum sahibi erişebilir)
+- Message content sanitization
 - File upload virus scanning
 - Input sanitization for all text fields
 - CORS policy configuration
 - API request logging
+- Chat data encryption at rest
 
 ### Scalability
 
@@ -640,7 +829,19 @@ SMTP_PASS=
 - Caching strategy for frequently accessed data
 - Queue system for heavy AI operations
 - CDN integration for file serving
+- Chat message archiving strategy
+- Session cleanup for inactive users
+
+### Data Retention & Privacy
+
+- Chat sessions auto-delete after 90 days of inactivity
+- Message soft-delete with recovery option (7 days)
+- User consent for AI training data usage
+- GDPR compliance for EU users
+- Data export functionality for user requests
 
 ---
 
 **Bu dokümantasyon projenin mevcut frontend implementasyonuna dayanmaktadır. Backend geliştirme sırasında ek özellikler veya değişiklikler gerekebilir.**
+
+**Yeni eklenen özellikler:** HiriBot Chat Sessions sistemi, konuşma geçmişi yönetimi, real-time chat güncellemeleri ve gelişmiş oturum yönetimi.
