@@ -139,6 +139,21 @@ export default function CandidateProfilePage() {
     };
   }, [showCvModal]);
 
+  // Genel Bakış sekmesi açıldığında radar chart oluştur
+  useEffect(() => {
+    if (activeTab === "genelBakis" && candidate && candidate.skills) {
+      // DOM güncellenene kadar bekle
+      setTimeout(() => {
+        createRadarChart(
+          "candidateProfileRadarChart",
+          candidate,
+          "rgba(124, 58, 237, 0.2)",
+          "rgb(124, 58, 237)"
+        );
+      }, 100);
+    }
+  }, [activeTab, candidate]);
+
   // Auto scroll chat to bottom
   useEffect(() => {
     const chatContainer = document.getElementById("chatContainer");
@@ -355,11 +370,33 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
             Math.floor(Math.random() * 90) + 10
           }${Math.floor(Math.random() * 90) + 10}`,
           position: candidate?.position || "Pozisyon Belirtilmemiş",
+          source: {
+            icon: "fab fa-linkedin",
+            color: "text-blue-500",
+            name: "LinkedIn",
+          },
           compatibilityScore: Math.floor(Math.random() * (95 - 75 + 1) + 75), // 75-95 arası
           compatibilityReasons: [
             "LinkedIn profilinden otomatik analiz sonucu uygun görülmektedir.",
             "Deneyim ve beceriler pozisyon gereksinimleriyle uyumludur.",
             "Eğitim altyapısı pozisyon için yeterli düzeydedir.",
+          ],
+          skills: {
+            Teknik: Math.floor(Math.random() * (9 - 6 + 1) + 6),
+            "Problem Çözme": Math.floor(Math.random() * (9 - 7 + 1) + 7),
+            Liderlik: Math.floor(Math.random() * (8 - 5 + 1) + 5),
+            İletişim: Math.floor(Math.random() * (9 - 7 + 1) + 7),
+            "Takım Çalışması": Math.floor(Math.random() * (9 - 7 + 1) + 7),
+            Öğrenme: Math.floor(Math.random() * (9 - 7 + 1) + 7),
+          },
+          strengths: [
+            "LinkedIn profilinde güçlü profesyonel ağ",
+            "İlgili alanda deneyim",
+            "Sürekli gelişim odaklı yaklaşım",
+          ],
+          weaknesses: [
+            "Detaylı teknik yetkinlik değerlendirmesi gerekli",
+            "Kültürel uyum analizi yapılmalı",
           ],
           cvSummary: `LinkedIn'den aktarılan ${item.name} ${item.surname}, ${
             Math.floor(Math.random() * 5) + 3
@@ -728,6 +765,99 @@ Bu bilgiler LinkedIn profilinden otomatik olarak çıkarılmış ve AI tarafınd
     setShowCompatibilityTooltip(false);
   };
 
+  // Radar chart oluşturma fonksiyonu
+  const createRadarChart = (
+    canvasId: string,
+    candidate: any,
+    bgColor: string,
+    borderColor: string
+  ) => {
+    const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Eğer önceki chart varsa yok et
+    if ((canvas as any).chart) {
+      (canvas as any).chart.destroy();
+    }
+
+    const chart = new (window as any).Chart(ctx, {
+      type: "radar",
+      data: {
+        labels: Object.keys(candidate.skills || {}),
+        datasets: [
+          {
+            label: candidate.name,
+            data: Object.values(candidate.skills || {}),
+            fill: true,
+            backgroundColor: bgColor,
+            borderColor: borderColor,
+            pointBackgroundColor: borderColor,
+            pointBorderColor: "#fff",
+            pointHoverBackgroundColor: "#fff",
+            pointHoverBorderColor: borderColor,
+            borderWidth: 3,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        layout: {
+          padding: {
+            top: 30,
+            bottom: 30,
+            left: 30,
+            right: 30,
+          },
+        },
+        elements: {
+          line: {
+            borderWidth: 3,
+          },
+        },
+        scales: {
+          r: {
+            angleLines: {
+              display: true,
+              color: "rgba(0, 0, 0, 0.05)",
+            },
+            grid: {
+              color: "rgba(0, 0, 0, 0.05)",
+            },
+            suggestedMin: 0,
+            suggestedMax: 10,
+            ticks: {
+              stepSize: 2,
+              display: true,
+              font: {
+                size: 10,
+              },
+              color: "rgba(0, 0, 0, 0.4)",
+            },
+            pointLabels: {
+              font: {
+                size: 11,
+                weight: "normal",
+              },
+              color: "rgba(0, 0, 0, 0.7)",
+            },
+          },
+        },
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+      },
+    });
+
+    // Chart'ı canvas'a kaydet ki sonra yok edebilsin
+    (canvas as any).chart = chart;
+  };
+
   const downloadReportAsText = () => {
     if (!selectedReport || !candidate) return;
 
@@ -860,15 +990,15 @@ Bu bilgiler LinkedIn profilinden otomatik olarak çıkarılmış ve AI tarafınd
       <Header currentView="candidates" />
 
       <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
-        {/* Başlık ve Geri Butonu */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-          <div className="mb-4 sm:mb-0">
-            <h1 className="text-3xl font-bold text-slate-800">
-              {candidate.name} {candidate.surname}
-            </h1>
-            <p className="text-slate-500 text-sm">{candidate.email}</p>
-            <p className="text-slate-500 text-sm">{candidate.phone}</p>
-          </div>
+        {/* Üst Navigasyon */}
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={() => router.push("/candidates")}
+            className="hiri-button hiri-button-secondary text-sm py-2"
+          >
+            <FaArrowLeft className="mr-2" />
+            Aday Listesine Dön
+          </button>
           <div className="flex items-center gap-2">
             <button
               onClick={openUnifiedChat}
@@ -884,18 +1014,58 @@ Bu bilgiler LinkedIn profilinden otomatik olarak çıkarılmış ve AI tarafınd
               <FaShareAlt className="mr-2" />
               Profili Paylaş
             </button>
-            <button
-              onClick={() => router.push("/candidates")}
-              className="hiri-button hiri-button-secondary text-sm py-2"
-            >
-              <FaArrowLeft className="mr-2" />
-              Aday Listesine Dön
-            </button>
           </div>
         </div>
 
         {/* Ana Kart */}
         <div className="hiri-card">
+          {/* Profile Header */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6 border-b border-gray-200 mb-6">
+            <div
+              className="w-32 h-32 rounded-full border-4 border-white shadow-lg flex items-center justify-center text-4xl font-bold"
+              style={{ backgroundColor: "#e9d5ff", color: "#7c3aed" }}
+            >
+              {candidate.name.charAt(0)}
+              {candidate.surname.charAt(0)}
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <h2 className="text-3xl font-bold text-slate-800 flex items-center gap-3 justify-center sm:justify-start">
+                {candidate.name} {candidate.surname}
+                <i
+                  className={`${candidate.source?.icon} ${candidate.source?.color}`}
+                  title={`Kaynak: ${candidate.source?.name}`}
+                ></i>
+              </h2>
+              <p className="text-lg text-slate-600 mb-3">
+                {candidate.position}
+              </p>
+              <div className="flex flex-col sm:flex-row items-center gap-4 text-sm text-slate-500">
+                <span className="flex items-center gap-2">
+                  <i className="fas fa-envelope text-purple-500"></i>
+                  {candidate.email}
+                </span>
+                <span className="flex items-center gap-2">
+                  <i className="fas fa-phone text-purple-500"></i>
+                  {candidate.phone}
+                </span>
+              </div>
+            </div>
+            <div className="flex-shrink-0 flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={handleShowCv}
+                className="hiri-button hiri-button-secondary text-sm"
+              >
+                <i className="fas fa-file-lines mr-2"></i>CV Görüntüle
+              </button>
+              <button
+                onClick={handleScheduledInterview}
+                className="hiri-button hiri-button-primary text-sm"
+              >
+                <i className="fas fa-calendar-alt mr-2"></i>Mülakat Planla
+              </button>
+            </div>
+          </div>
+
           {/* Sekmeler */}
           <div className="mb-6 border-b border-slate-200">
             <div className="flex space-x-8">
@@ -1026,6 +1196,20 @@ Bu bilgiler LinkedIn profilinden otomatik olarak çıkarılmış ve AI tarafınd
                         {candidate.compatibilityScore}%
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-700 mb-3">
+                    Yetenek Haritası
+                  </h2>
+                  <div className="flex justify-center">
+                    <canvas
+                      id="candidateProfileRadarChart"
+                      width="350"
+                      height="350"
+                      style={{ maxWidth: "350px", maxHeight: "350px" }}
+                    ></canvas>
                   </div>
                 </div>
               </div>

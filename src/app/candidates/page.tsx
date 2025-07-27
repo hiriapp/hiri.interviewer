@@ -14,7 +14,7 @@ import {
   FaEye,
   FaFileAlt,
 } from "react-icons/fa";
-import { DUMMY_CANDIDATES } from "@/lib/dummy-data";
+import { DUMMY_CANDIDATES, AI_COMPARISON_ANALYSES } from "@/lib/dummy-data";
 
 // Tooltip Portal Component
 function TooltipPortal({ children }: { children: React.ReactNode }) {
@@ -147,9 +147,18 @@ export default function CandidatesPage() {
   );
   const [selectAll, setSelectAll] = useState(false);
 
+  // Aday karşılaştırma state'leri
+  const [showComparisonModal, setShowComparisonModal] = useState(false);
+  const [comparisonCandidates, setComparisonCandidates] = useState<any[]>([]);
+
   // Modal kontrol
   useEffect(() => {
-    if (showCvModal || showInterviewSetupModal || showBulkInterviewSetupModal) {
+    if (
+      showCvModal ||
+      showInterviewSetupModal ||
+      showBulkInterviewSetupModal ||
+      showComparisonModal
+    ) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -158,7 +167,33 @@ export default function CandidatesPage() {
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [showCvModal, showInterviewSetupModal, showBulkInterviewSetupModal]);
+  }, [
+    showCvModal,
+    showInterviewSetupModal,
+    showBulkInterviewSetupModal,
+    showComparisonModal,
+  ]);
+
+  // Karşılaştırma modalı açıldığında radar chart'ları oluştur
+  useEffect(() => {
+    if (showComparisonModal && comparisonCandidates.length === 2) {
+      // DOM güncellenene kadar bekle
+      setTimeout(() => {
+        createRadarChart(
+          `chart-${comparisonCandidates[0].id}`,
+          comparisonCandidates[0],
+          "rgba(124, 58, 237, 0.2)",
+          "rgb(124, 58, 237)"
+        );
+        createRadarChart(
+          `chart-${comparisonCandidates[1].id}`,
+          comparisonCandidates[1],
+          "rgba(59, 130, 246, 0.2)",
+          "rgb(59, 130, 246)"
+        );
+      }, 100);
+    }
+  }, [showComparisonModal, comparisonCandidates]);
 
   // Competencies and Topics
   const competencies = [
@@ -470,6 +505,121 @@ export default function CandidatesPage() {
     setActiveTooltip(null);
   };
 
+  // Aday karşılaştırma fonksiyonları
+  const handleCompareSelected = () => {
+    if (selectedCandidates.size === 2) {
+      const candidateIds = Array.from(selectedCandidates);
+      const candidatesData = candidateIds
+        .map((id) => candidates.find((c) => c.id === id))
+        .filter(Boolean);
+
+      setComparisonCandidates(candidatesData);
+      setShowComparisonModal(true);
+    } else {
+      alert("Karşılaştırma için tam olarak 2 aday seçmelisiniz.");
+    }
+  };
+
+  const handleCloseComparisonModal = () => {
+    setShowComparisonModal(false);
+    setSelectedCandidates(new Set()); // Seçimleri temizle
+    setSelectAll(false);
+    setComparisonCandidates([]);
+  };
+
+  // Radar chart oluşturma fonksiyonu
+  const createRadarChart = (
+    canvasId: string,
+    candidate: any,
+    bgColor: string,
+    borderColor: string
+  ) => {
+    const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Eğer önceki chart varsa yok et
+    if ((canvas as any).chart) {
+      (canvas as any).chart.destroy();
+    }
+
+    const chart = new (window as any).Chart(ctx, {
+      type: "radar",
+      data: {
+        labels: Object.keys(candidate.skills || {}),
+        datasets: [
+          {
+            label: candidate.name,
+            data: Object.values(candidate.skills || {}),
+            fill: true,
+            backgroundColor: bgColor,
+            borderColor: borderColor,
+            pointBackgroundColor: borderColor,
+            pointBorderColor: "#fff",
+            pointHoverBackgroundColor: "#fff",
+            pointHoverBorderColor: borderColor,
+            borderWidth: 3,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        layout: {
+          padding: {
+            top: 30,
+            bottom: 30,
+            left: 30,
+            right: 30,
+          },
+        },
+        elements: {
+          line: {
+            borderWidth: 3,
+          },
+        },
+        scales: {
+          r: {
+            angleLines: {
+              display: true,
+              color: "rgba(0, 0, 0, 0.05)",
+            },
+            grid: {
+              color: "rgba(0, 0, 0, 0.05)",
+            },
+            suggestedMin: 0,
+            suggestedMax: 10,
+            ticks: {
+              stepSize: 2,
+              display: true,
+              font: {
+                size: 10,
+              },
+              color: "rgba(0, 0, 0, 0.4)",
+            },
+            pointLabels: {
+              font: {
+                size: 11,
+                weight: "normal",
+              },
+              color: "rgba(0, 0, 0, 0.7)",
+            },
+          },
+        },
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+      },
+    });
+
+    // Chart'ı canvas'a kaydet ki sonra yok edebilsin
+    (canvas as any).chart = chart;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header currentView={currentView} />
@@ -551,26 +701,48 @@ export default function CandidatesPage() {
                 </label>
               </div>
 
-              {selectedCandidates.size > 0 && (
-                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                  <button
-                    onClick={handleBulkInterview}
-                    className="inline-flex items-center px-3 py-1.5 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 transition-colors justify-center"
-                  >
-                    <FaVideo className="w-3 h-3 mr-1.5" />
-                    Mülakat ({selectedCandidates.size})
-                  </button>
-                  <button
-                    onClick={() =>
-                      alert("Toplu e-posta özelliği geliştiriliyor.")
-                    }
-                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50 transition-colors justify-center"
-                  >
-                    <FaPaperPlane className="w-3 h-3 mr-1.5" />
-                    E-posta
-                  </button>
-                </div>
-              )}
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <button
+                  onClick={handleCompareSelected}
+                  disabled={selectedCandidates.size !== 2}
+                  className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors justify-center ${
+                    selectedCandidates.size === 2
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  <i className="fas fa-balance-scale w-3 h-3 mr-1.5" />
+                  Karşılaştır ({selectedCandidates.size}/2)
+                </button>
+                <button
+                  onClick={handleBulkInterview}
+                  disabled={selectedCandidates.size === 0}
+                  className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors justify-center ${
+                    selectedCandidates.size > 0
+                      ? "bg-purple-600 text-white hover:bg-purple-700"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  <FaVideo className="w-3 h-3 mr-1.5" />
+                  Mülakat ({selectedCandidates.size})
+                </button>
+                <button
+                  onClick={() =>
+                    selectedCandidates.size > 0
+                      ? alert("Toplu e-posta özelliği geliştiriliyor.")
+                      : null
+                  }
+                  disabled={selectedCandidates.size === 0}
+                  className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors justify-center ${
+                    selectedCandidates.size > 0
+                      ? "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      : "border border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50"
+                  }`}
+                >
+                  <FaPaperPlane className="w-3 h-3 mr-1.5" />
+                  E-posta ({selectedCandidates.size})
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -1329,6 +1501,103 @@ export default function CandidatesPage() {
                 >
                   Davetleri Gönder ve Mülakatları Başlat
                 </button>
+              </div>
+            </div>
+          </div>
+        </ModalPortal>
+      )}
+
+      {/* Aday Karşılaştırma Modal */}
+      {showComparisonModal && comparisonCandidates.length === 2 && (
+        <ModalPortal>
+          <div
+            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4"
+            style={{ zIndex: 9999 }}
+            onClick={handleCloseComparisonModal}
+          >
+            <div
+              className="bg-white rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex justify-between items-center p-6 border-b border-gray-200">
+                <h2 className="text-3xl font-bold text-slate-700">
+                  Aday Karşılaştırma Analizi
+                </h2>
+                <button
+                  onClick={handleCloseComparisonModal}
+                  className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="flex-grow overflow-auto p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                  {comparisonCandidates.map((candidate, index) => (
+                    <div
+                      key={candidate.id}
+                      className="border p-4 rounded-lg bg-white shadow-sm"
+                    >
+                      <h3 className="text-xl font-bold text-center mb-4">
+                        {candidate.name} {candidate.surname}
+                      </h3>
+
+                      <canvas id={`chart-${candidate.id}`}></canvas>
+
+                      <div className="mt-4">
+                        <h4 className="font-semibold text-green-600">
+                          Güçlü Yönler
+                        </h4>
+                        <ul className="list-disc list-inside text-sm text-slate-600">
+                          {candidate.strengths?.map(
+                            (strength: string, idx: number) => (
+                              <li key={idx}>{strength}</li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+
+                      <div className="mt-2">
+                        <h4 className="font-semibold text-red-600">
+                          Gelişime Açık Yönler
+                        </h4>
+                        <ul className="list-disc list-inside text-sm text-slate-600">
+                          {candidate.weaknesses?.map(
+                            (weakness: string, idx: number) => (
+                              <li key={idx}>{weakness}</li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-indigo-50 p-6 rounded-lg border border-indigo-200">
+                  <h3 className="font-bold text-lg text-indigo-800 mb-2 flex items-center gap-2">
+                    <i className="fas fa-robot"></i> Yapay Zeka Karşılaştırma
+                    Analizi
+                  </h3>
+                  <p
+                    className="text-sm text-indigo-900"
+                    dangerouslySetInnerHTML={{
+                      __html: (() => {
+                        const key1 = `${comparisonCandidates[0].id}_${comparisonCandidates[1].id}`;
+                        const key2 = `${comparisonCandidates[1].id}_${comparisonCandidates[0].id}`;
+                        const analysis =
+                          (AI_COMPARISON_ANALYSES as any)[key1] ||
+                          (AI_COMPARISON_ANALYSES as any)[key2] ||
+                          "Bu iki aday için henüz karşılaştırma analizi oluşturulmamış.";
+                        return analysis.replace(
+                          /\*\*(.*?)\*\*/g,
+                          "<strong>$1</strong>"
+                        );
+                      })(),
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>

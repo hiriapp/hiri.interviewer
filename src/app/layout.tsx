@@ -23,6 +23,7 @@ export default function RootLayout({
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
           rel="stylesheet"
         />
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       </head>
       <body className={inter.className}>
         <SessionProvider>{children}</SessionProvider>
