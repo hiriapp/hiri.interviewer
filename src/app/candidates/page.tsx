@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/dashboard/Header";
 import { Footer } from "@/components/layout/Footer";
+import { SuccessModal, ErrorModal, ConfirmationModal } from "@/components/ui";
 import {
   FaSearch,
   FaUserPlus,
@@ -13,6 +14,7 @@ import {
   FaPaperPlane,
   FaEye,
   FaFileAlt,
+  FaSyncAlt,
 } from "react-icons/fa";
 import { DUMMY_CANDIDATES, AI_COMPARISON_ANALYSES } from "@/lib/dummy-data";
 
@@ -151,6 +153,18 @@ export default function CandidatesPage() {
   const [showComparisonModal, setShowComparisonModal] = useState(false);
   const [comparisonCandidates, setComparisonCandidates] = useState<any[]>([]);
 
+  // Modal states
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [modalContent, setModalContent] = useState({
+    title: "",
+    message: "",
+  });
+  const [confirmationAction, setConfirmationAction] = useState<() => void>(
+    () => {}
+  );
+
   // Modal kontrol
   useEffect(() => {
     if (
@@ -238,8 +252,45 @@ export default function CandidatesPage() {
     },
   ]);
 
-  // Merkezi veri kaynağından adayları al
-  const candidates = DUMMY_CANDIDATES;
+  // Aday listesi state yönetimi
+  const [candidates, setCandidates] = useState(DUMMY_CANDIDATES);
+
+  // Sayfa yüklendiğinde verileri yenile
+  // Sayfa yüklendiğinde ve focus olduğunda verileri yenile
+  useEffect(() => {
+    const refreshCandidates = () => {
+      setCandidates([...DUMMY_CANDIDATES]);
+      console.log(
+        "Candidates refreshed, total count:",
+        DUMMY_CANDIDATES.length
+      );
+    };
+
+    // İlk yükleme
+    refreshCandidates();
+
+    // Yeni aday eklendiyse refresh flag'ini kontrol et
+    const shouldRefresh = localStorage.getItem("candidatesRefresh");
+    if (shouldRefresh === "true") {
+      refreshCandidates();
+      localStorage.removeItem("candidatesRefresh");
+    }
+
+    // Sayfa focus olduğunda da kontrol et (başka tabdan döndüğünde)
+    const handleFocus = () => {
+      const shouldRefreshOnFocus = localStorage.getItem("candidatesRefresh");
+      if (shouldRefreshOnFocus === "true") {
+        refreshCandidates();
+        localStorage.removeItem("candidatesRefresh");
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
   const uniquePositions = getUniquePositions(candidates);
   const allStatuses: CandidateStatus[] = [
     "Beklemede",
@@ -297,7 +348,11 @@ export default function CandidatesPage() {
       setSelectedCandidateName(`${candidate.name} ${candidate.surname}`);
       setShowCvModal(true);
     } else {
-      alert("Bu aday için CV metni bulunamadı.");
+      setModalContent({
+        title: "CV Bulunamadı",
+        message: "Bu aday için CV metni bulunamadı.",
+      });
+      setShowErrorModal(true);
     }
   };
 
@@ -305,7 +360,11 @@ export default function CandidatesPage() {
   const loadTemplate = (templateId: string, isBulk = false) => {
     const template = questionTemplates.find((tpl) => tpl.id === templateId);
     if (!template) {
-      alert("Şablon bulunamadı!");
+      setModalContent({
+        title: "Şablon Bulunamadı",
+        message: "Seçilen şablon bulunamadı!",
+      });
+      setShowErrorModal(true);
       return;
     }
 
@@ -353,30 +412,39 @@ export default function CandidatesPage() {
       setSelectedTemplate("");
     }
 
-    alert(`"${template.name}" şablonu başarıyla yüklendi!`);
+    setModalContent({
+      title: "Şablon Yüklendi",
+      message: `"${template.name}" şablonu başarıyla yüklendi!`,
+    });
+    setShowSuccessModal(true);
   };
 
   const saveTemplate = (isBulk = false) => {
+    const competenciesSet = isBulk
+      ? bulkSelectedCompetencies
+      : selectedCompetencies;
+    const topicsSet = isBulk
+      ? bulkSelectedGeneralTopics
+      : selectedGeneralTopics;
+    const questionsSet = isBulk ? bulkManualQuestions : manualQuestions;
+
+    // Boş şablon kontrolü
+    if (
+      competenciesSet.size === 0 &&
+      topicsSet.size === 0 &&
+      questionsSet.size === 0
+    ) {
+      setModalContent({
+        title: "Boş Şablon",
+        message: "En az bir yetkinlik, konu veya soru seçmelisiniz!",
+      });
+      setShowErrorModal(true);
+      return;
+    }
+
+    // Şablon kaydetme için basit bir prompt (daha sonra modal'la değiştirilebilir)
     const templateName = prompt("Şablon için bir isim girin:");
     if (templateName && templateName.trim()) {
-      const competenciesSet = isBulk
-        ? bulkSelectedCompetencies
-        : selectedCompetencies;
-      const topicsSet = isBulk
-        ? bulkSelectedGeneralTopics
-        : selectedGeneralTopics;
-      const questionsSet = isBulk ? bulkManualQuestions : manualQuestions;
-
-      // Boş şablon kontrolü
-      if (
-        competenciesSet.size === 0 &&
-        topicsSet.size === 0 &&
-        questionsSet.size === 0
-      ) {
-        alert("En az bir yetkinlik, konu veya soru seçmelisiniz!");
-        return;
-      }
-
       const newTemplate = {
         id: "tpl" + Date.now(),
         name: templateName.trim(),
@@ -389,7 +457,11 @@ export default function CandidatesPage() {
 
       // State'i güncelle ki yeni şablon listede görünsün
       setQuestionTemplates((prev) => [...prev, newTemplate]);
-      alert(`"${templateName}" şablonu başarıyla kaydedildi!`);
+      setModalContent({
+        title: "Şablon Kaydedildi",
+        message: `"${templateName}" şablonu başarıyla kaydedildi!`,
+      });
+      setShowSuccessModal(true);
     }
   };
 
@@ -475,14 +547,20 @@ export default function CandidatesPage() {
   };
 
   const handleStartInterviewProcess = () => {
-    alert(
-      `${selectedCandidateForInterview?.name} için mülakat başlatılıyor...`
-    );
+    setModalContent({
+      title: "Mülakat Başlatıldı",
+      message: `${selectedCandidateForInterview?.name} için mülakat başlatılıyor...`,
+    });
+    setShowSuccessModal(true);
     setShowInterviewSetupModal(false);
   };
 
   const handleStartBulkInterviewProcess = () => {
-    alert(`${selectedCandidates.size} aday için toplu mülakat başlatılıyor...`);
+    setModalContent({
+      title: "Toplu Mülakat Başlatıldı",
+      message: `${selectedCandidates.size} aday için toplu mülakat başlatılıyor...`,
+    });
+    setShowSuccessModal(true);
     setShowBulkInterviewSetupModal(false);
     setSelectedCandidates(new Set()); // Clear selections
     setSelectAll(false);
@@ -516,7 +594,11 @@ export default function CandidatesPage() {
       setComparisonCandidates(candidatesData);
       setShowComparisonModal(true);
     } else {
-      alert("Karşılaştırma için tam olarak 2 aday seçmelisiniz.");
+      setModalContent({
+        title: "Seçim Hatası",
+        message: "Karşılaştırma için tam olarak 2 aday seçmelisiniz.",
+      });
+      setShowErrorModal(true);
     }
   };
 
@@ -627,7 +709,26 @@ export default function CandidatesPage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Başlık */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Aday Havuzu</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Aday Havuzu
+            </h1>
+            <button
+              onClick={() => {
+                setCandidates([...DUMMY_CANDIDATES]);
+                setModalContent({
+                  title: "Liste Yenilendi",
+                  message: `${DUMMY_CANDIDATES.length} aday yüklendi.`,
+                });
+                setShowSuccessModal(true);
+              }}
+              className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors"
+              title="Listeyi Yenile"
+            >
+              <FaSyncAlt className="w-3 h-3 mr-1" />
+              Yenile
+            </button>
+          </div>
           <button
             onClick={() => router.push("/candidates/create")}
             className="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors w-full sm:w-auto justify-center"
@@ -1637,6 +1738,29 @@ export default function CandidatesPage() {
           </div>
         </TooltipPortal>
       )}
+
+      {/* Modals */}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title={modalContent.title}
+        message={modalContent.message}
+      />
+
+      <ErrorModal
+        isOpen={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        title={modalContent.title}
+        message={modalContent.message}
+      />
+
+      <ConfirmationModal
+        isOpen={showConfirmationModal}
+        onClose={() => setShowConfirmationModal(false)}
+        onConfirm={confirmationAction}
+        title={modalContent.title}
+        message={modalContent.message}
+      />
     </div>
   );
 }

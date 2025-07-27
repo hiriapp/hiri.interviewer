@@ -27,7 +27,6 @@ import {
   FaShareAlt,
   FaLink,
   FaCopy,
-  FaLinkedin,
 } from "react-icons/fa";
 import { DUMMY_CANDIDATES } from "@/lib/dummy-data";
 
@@ -77,11 +76,6 @@ export default function CandidateProfilePage() {
     null
   );
 
-  // LinkedIn import modal states
-  const [showLinkedinModal, setShowLinkedinModal] = useState(false);
-  const [linkedinImportStep, setLinkedinImportStep] = useState(1);
-  const [linkedinFile, setLinkedinFile] = useState<File | null>(null);
-  const [linkedinImportProgress, setLinkedinImportProgress] = useState(0);
   const [chatMessages, setChatMessages] = useState<
     Array<{
       id: string;
@@ -321,202 +315,6 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
       notesFile: null,
       videoFile: null,
     });
-  };
-
-  // LinkedIn import handler
-  const handleLinkedinImport = () => {
-    // Step 2'ye geç - işlem başlıyor
-    setLinkedinImportStep(2);
-    setLinkedinImportProgress(0);
-
-    // Progress simulation
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-      progress += 10;
-      setLinkedinImportProgress(progress);
-
-      if (progress >= 100) {
-        clearInterval(progressInterval);
-
-        // Simulated LinkedIn data - would normally come from CSV parsing
-        const linkedinCsvData = [
-          {
-            id: "aday_bulk_1",
-            name: "Ayşe",
-            surname: "Yılmaz",
-            profileUrl: "linkedin.com/in/ayseyilmaz",
-          },
-          {
-            id: "aday_bulk_2",
-            name: "Fatma",
-            surname: "Kaya",
-            profileUrl: "linkedin.com/in/fatmakaya",
-          },
-          {
-            id: "aday_bulk_3",
-            name: "Ali",
-            surname: "Çelik",
-            profileUrl: "linkedin.com/in/alicelik",
-          },
-        ];
-
-        // Create new candidates with proper DUMMY_CANDIDATES structure
-        const newCandidates = linkedinCsvData.map((item, index) => ({
-          id: `linkedin_${Date.now()}_${index}`,
-          name: item.name,
-          surname: item.surname,
-          email: `${item.name.toLowerCase()}.${item.surname.toLowerCase()}@example.com`,
-          phone: `0555 ${Math.floor(Math.random() * 900) + 100} ${
-            Math.floor(Math.random() * 90) + 10
-          }${Math.floor(Math.random() * 90) + 10}`,
-          position: candidate?.position || "Pozisyon Belirtilmemiş",
-          source: {
-            icon: "fab fa-linkedin",
-            color: "text-blue-500",
-            name: "LinkedIn",
-          },
-          compatibilityScore: Math.floor(Math.random() * (95 - 75 + 1) + 75), // 75-95 arası
-          compatibilityReasons: [
-            "LinkedIn profilinden otomatik analiz sonucu uygun görülmektedir.",
-            "Deneyim ve beceriler pozisyon gereksinimleriyle uyumludur.",
-            "Eğitim altyapısı pozisyon için yeterli düzeydedir.",
-          ],
-          skills: {
-            Teknik: Math.floor(Math.random() * (9 - 6 + 1) + 6),
-            "Problem Çözme": Math.floor(Math.random() * (9 - 7 + 1) + 7),
-            Liderlik: Math.floor(Math.random() * (8 - 5 + 1) + 5),
-            İletişim: Math.floor(Math.random() * (9 - 7 + 1) + 7),
-            "Takım Çalışması": Math.floor(Math.random() * (9 - 7 + 1) + 7),
-            Öğrenme: Math.floor(Math.random() * (9 - 7 + 1) + 7),
-          },
-          strengths: [
-            "LinkedIn profilinde güçlü profesyonel ağ",
-            "İlgili alanda deneyim",
-            "Sürekli gelişim odaklı yaklaşım",
-          ],
-          weaknesses: [
-            "Detaylı teknik yetkinlik değerlendirmesi gerekli",
-            "Kültürel uyum analizi yapılmalı",
-          ],
-          cvSummary: `LinkedIn'den aktarılan ${item.name} ${item.surname}, ${
-            Math.floor(Math.random() * 5) + 3
-          } yıl deneyimli bir profesyoneldir. Pozisyon gereksinimleri ile uyumlu background'a sahiptir.`,
-          personalityInventorySummaryAI:
-            "LinkedIn profil analizi sonucu değerlendirme yapılmıştır. Detaylı kişilik envanteri tamamlandığında daha kapsamlı analiz sağlanacaktır.",
-          cvText: `${item.name.toUpperCase()} ${item.surname.toUpperCase()}
-${item.name.toLowerCase()}.${item.surname.toLowerCase()}@example.com | LinkedIn: ${
-            item.profileUrl
-          }
-
-ÖZET
-LinkedIn'den aktarılan profesyonel profil. ${
-            Math.floor(Math.random() * 5) + 3
-          } yıl deneyimli.
-
-DENEYİMLER
-[LinkedIn profilinden otomatik olarak çıkarılan deneyim bilgileri]
-
-YETENEKLER
-[LinkedIn profilinden otomatik olarak çıkarılan yetenek bilgileri]
-
-EĞİTİM
-[LinkedIn profilinden otomatik olarak çıkarılan eğitim bilgileri]`,
-          interviews: [],
-          notes: [
-            {
-              user: "Sistem",
-              timestamp:
-                new Date().toLocaleDateString("tr-TR") +
-                " " +
-                new Date().toLocaleTimeString("tr-TR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }),
-              text: `LinkedIn'den CSV ile aktarıldı.`,
-            },
-          ],
-          logs: [
-            {
-              user: "Sistem",
-              timestamp:
-                new Date().toLocaleDateString("tr-TR") +
-                " " +
-                new Date().toLocaleTimeString("tr-TR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }),
-              action: `LinkedIn'den CSV ile aktarıldı`,
-              icon: "fa-linkedin",
-              color: "bg-blue-100 text-blue-600",
-            },
-          ],
-        }));
-
-        // Add to DUMMY_CANDIDATES array (simulate adding to real database)
-        // In a real app, this would be an API call
-        DUMMY_CANDIDATES.push(...newCandidates);
-
-        // Simulate CV scraping process
-        newCandidates.forEach((newCandidate, index) => {
-          setTimeout(() => {
-            // Update candidate data in DUMMY_CANDIDATES after "scraping"
-            const candidateIndex = DUMMY_CANDIDATES.findIndex(
-              (c) => c.id === newCandidate.id
-            );
-            if (candidateIndex !== -1) {
-              DUMMY_CANDIDATES[candidateIndex] = {
-                ...DUMMY_CANDIDATES[candidateIndex],
-                cvSummary: `LinkedIn'den taranan detaylı profil: ${
-                  Math.floor(Math.random() * 5) + 3
-                } yıl deneyimli, ${
-                  newCandidate.position
-                } pozisyonu için uygun görülmektedir. Profil tarama tamamlandı.`,
-                compatibilityScore: Math.floor(
-                  Math.random() * (95 - 75 + 1) + 75
-                ),
-                cvText: `${newCandidate.name.toUpperCase()} ${newCandidate.surname.toUpperCase()}
-${newCandidate.email} | ${newCandidate.phone}
-
-LINKEDIN PROFIL ÖZETI
-${Math.floor(Math.random() * 5) + 3} yıl deneyimli profesyonel
-
-DENEYİMLER
-- Senior pozisyonlarda çalışma deneyimi
-- Takım liderliği ve proje yönetimi
-- Teknik beceriler ve uzmanlık alanları
-
-YETENEKLER
-- İlgili pozisyon becerileri
-- Soft skills ve iletişim
-- Liderlik ve problem çözme
-
-EĞİTİM
-Üniversite mezunu
-Çeşitli sertifikalar ve eğitimler
-
-Bu bilgiler LinkedIn profilinden otomatik olarak çıkarılmış ve AI tarafından analiz edilmiştir.`,
-              };
-            }
-
-            console.log(
-              `LinkedIn candidate ${newCandidate.name} ${newCandidate.surname} processing completed`
-            );
-          }, (index + 1) * 2000); // Her aday için 2 saniye aralık
-        });
-
-        // Close modal and show success
-        setTimeout(() => {
-          setShowLinkedinModal(false);
-          setLinkedinImportStep(1);
-          setLinkedinFile(null);
-          setLinkedinImportProgress(0);
-
-          alert(
-            `Başarılı! LinkedIn'den ${newCandidates.length} aday sisteme eklendi ve adaylar tablosunda görünecektir. Arka plan işlemi profillerini detaylı olarak taramaya başlıyor.`
-          );
-        }, 500);
-      }
-    }, 200); // Her 200ms'de %10 artış = 2 saniye toplam
   };
 
   const handleViewReport = (interviewId: string) => {
@@ -991,25 +789,25 @@ Bu bilgiler LinkedIn profilinden otomatik olarak çıkarılmış ve AI tarafınd
 
       <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
         {/* Üst Navigasyon */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:justify-between sm:items-center">
           <button
             onClick={() => router.push("/candidates")}
-            className="hiri-button hiri-button-secondary text-sm py-2"
+            className="hiri-button hiri-button-secondary text-sm py-2 w-full sm:w-auto"
           >
             <FaArrowLeft className="mr-2" />
             Aday Listesine Dön
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
             <button
               onClick={openUnifiedChat}
-              className="hiri-button hiri-button-primary text-sm py-2"
+              className="hiri-button hiri-button-primary text-sm py-2 w-full sm:w-auto"
             >
               <FaMagic className="mr-2" />
               HiriBot ile Sohbet
             </button>
             <button
               onClick={handleShareProfile}
-              className="hiri-button hiri-button-secondary text-sm py-2"
+              className="hiri-button hiri-button-secondary text-sm py-2 w-full sm:w-auto"
             >
               <FaShareAlt className="mr-2" />
               Profili Paylaş
@@ -1098,17 +896,6 @@ Bu bilgiler LinkedIn profilinden otomatik olarak çıkarılmış ve AI tarafınd
                 }`}
               >
                 Mülakat Kayıtları
-              </button>
-              <button
-                onClick={() => setActiveTab("linkedin")}
-                className={`py-3 px-1 border-b-3 font-semibold text-sm transition-colors ${
-                  activeTab === "linkedin"
-                    ? "border-hiri-purple text-hiri-purple"
-                    : "border-transparent text-slate-500 hover:text-slate-700"
-                }`}
-              >
-                <FaLinkedin className="inline mr-2" />
-                LinkedIn
               </button>
             </div>
           </div>
@@ -1203,12 +990,18 @@ Bu bilgiler LinkedIn profilinden otomatik olarak çıkarılmış ve AI tarafınd
                   <h2 className="text-xl font-semibold text-slate-700 mb-3">
                     Yetenek Haritası
                   </h2>
-                  <div className="flex justify-center">
+                  <div className="flex justify-center w-full">
                     <canvas
                       id="candidateProfileRadarChart"
-                      width="350"
-                      height="350"
-                      style={{ maxWidth: "350px", maxHeight: "350px" }}
+                      className="w-full h-auto max-w-sm sm:max-w-md lg:max-w-lg"
+                      width="400"
+                      height="400"
+                      style={{
+                        minWidth: "280px",
+                        minHeight: "280px",
+                        maxWidth: "450px",
+                        maxHeight: "450px",
+                      }}
                     ></canvas>
                   </div>
                 </div>
@@ -1380,111 +1173,6 @@ Bu bilgiler LinkedIn profilinden otomatik olarak çıkarılmış ve AI tarafınd
                     </div>
                   ))
                 )}
-              </div>
-            </div>
-          )}
-
-          {/* LinkedIn Sekmesi */}
-          {activeTab === "linkedin" && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-slate-700">
-                  <FaLinkedin className="inline mr-2 text-blue-600" />
-                  LinkedIn Aday Aktarımı
-                </h2>
-                <button
-                  onClick={() => setShowLinkedinModal(true)}
-                  className="hiri-button hiri-button-primary"
-                >
-                  <FaLinkedin className="mr-2" />
-                  LinkedIn'den CSV Aktar
-                </button>
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-blue-800 mb-3">
-                  <FaLinkedin className="inline mr-2" />
-                  LinkedIn Aday Aktarımı Nasıl Çalışır?
-                </h3>
-                <div className="space-y-3 text-sm text-blue-700">
-                  <div className="flex items-start">
-                    <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">
-                      1
-                    </span>
-                    <p>
-                      LinkedIn'de aday araması yapın ve sonuçları CSV formatında
-                      dışa aktarın.
-                    </p>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">
-                      2
-                    </span>
-                    <p>
-                      Dışa aktardığınız CSV dosyasını yukarıdaki butona
-                      tıklayarak yükleyin.
-                    </p>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">
-                      3
-                    </span>
-                    <p>
-                      HiriBot otomatik olarak her adayın LinkedIn profilini
-                      tarayarak detaylı CV bilgilerini alacaktır.
-                    </p>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">
-                      4
-                    </span>
-                    <p>
-                      Adaylar sisteme otomatik olarak eklenir ve adaylar
-                      tablosunda görünür hale gelir.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-                  <FaFileAlt className="text-green-600 text-3xl mx-auto mb-2" />
-                  <h4 className="font-semibold text-green-800">
-                    Otomatik CV Tarama
-                  </h4>
-                  <p className="text-sm text-green-700 mt-1">
-                    LinkedIn profillerinden tam CV bilgileri otomatik olarak
-                    çıkarılır
-                  </p>
-                </div>
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
-                  <FaChartBar className="text-purple-600 text-3xl mx-auto mb-2" />
-                  <h4 className="font-semibold text-purple-800">
-                    Uyumluluk Analizi
-                  </h4>
-                  <p className="text-sm text-purple-700 mt-1">
-                    AI destekli pozisyon uyumluluk skorları hesaplanır
-                  </p>
-                </div>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-                  <FaSyncAlt className="text-blue-600 text-3xl mx-auto mb-2" />
-                  <h4 className="font-semibold text-blue-800">Toplu İşlem</h4>
-                  <p className="text-sm text-blue-700 mt-1">
-                    Tek seferde yüzlerce aday profili işlenebilir
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <h4 className="font-semibold text-yellow-800 mb-2">
-                  💡 Pro İpucu
-                </h4>
-                <p className="text-sm text-yellow-700">
-                  En iyi sonuçlar için LinkedIn Premium kullanarak aday
-                  aramalarınızı genişletin ve daha detaylı profil bilgilerine
-                  erişin. Aktarılan adaylar doğrudan <strong>Adaylar</strong>{" "}
-                  sayfasında görünecektir.
-                </p>
               </div>
             </div>
           )}
@@ -2706,104 +2394,6 @@ Bu bilgiler LinkedIn profilinden otomatik olarak çıkarılmış ve AI tarafınd
                   </div>
                 </form>
               </div>
-            </div>
-          </div>
-        </ModalPortal>
-      )}
-
-      {/* LinkedIn Import Modal */}
-      {showLinkedinModal && (
-        <ModalPortal>
-          <div
-            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4"
-            style={{ zIndex: 9999 }}
-            onClick={() => {
-              setShowLinkedinModal(false);
-              setLinkedinImportStep(1);
-              setLinkedinFile(null);
-              setLinkedinImportProgress(0);
-            }}
-          >
-            <div
-              className="bg-white rounded-xl shadow-2xl w-full max-w-lg"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {linkedinImportStep === 1 && (
-                <div className="p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-semibold text-slate-700">
-                      LinkedIn'den Aday Aktar (CSV)
-                    </h2>
-                    <button
-                      onClick={() => {
-                        setShowLinkedinModal(false);
-                        setLinkedinImportStep(1);
-                        setLinkedinFile(null);
-                        setLinkedinImportProgress(0);
-                      }}
-                      className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
-                    >
-                      ×
-                    </button>
-                  </div>
-
-                  <p className="text-sm text-slate-500 mb-5">
-                    LinkedIn'den dışa aktardığınız aday listesi dosyasını (CSV)
-                    yükleyin. Sistem, her adayın profilini tarayarak tam CV
-                    bilgilerini alacaktır.
-                  </p>
-
-                  <label className="dropzone-style mt-1 flex flex-col items-center justify-center px-6 py-10 rounded-lg cursor-pointer border-2 border-dashed border-slate-300 hover:border-blue-400 transition-colors">
-                    <div className="space-y-1 text-center">
-                      <FaLinkedin className="text-5xl text-blue-500 mx-auto mb-4" />
-                      <div className="flex text-sm text-slate-500 mt-4">
-                        <span className="relative cursor-pointer bg-transparent rounded-md font-medium text-purple-600 hover:text-purple-500">
-                          Dosya seçin
-                        </span>
-                        <input
-                          type="file"
-                          className="sr-only"
-                          accept=".csv"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              setLinkedinFile(file);
-                              handleLinkedinImport();
-                            }
-                          }}
-                        />
-                        <p className="pl-1">veya sürükleyip bırakın</p>
-                      </div>
-                      <p className="text-xs text-slate-400">
-                        Sadece CSV dosyaları
-                      </p>
-                    </div>
-                  </label>
-                </div>
-              )}
-
-              {linkedinImportStep === 2 && (
-                <div className="p-6 text-center">
-                  <h2 className="text-2xl font-semibold mb-4 text-slate-700">
-                    Adaylar Sisteme Ekleniyor...
-                  </h2>
-                  <FaSyncAlt className="fa-spin text-5xl text-purple-600 mb-4 mx-auto animate-spin" />
-                  <p className="text-slate-600">
-                    Adaylar ekleniyor ve HiriBot CV'lerini taramak için sıraya
-                    alıyor.
-                  </p>
-
-                  <div className="mt-6 w-full bg-gray-200 rounded-full h-2.5">
-                    <div
-                      className="bg-purple-600 h-2.5 rounded-full transition-all duration-300"
-                      style={{ width: `${linkedinImportProgress}%` }}
-                    />
-                  </div>
-                  <p className="text-sm text-slate-500 mt-2">
-                    İşlem devam ediyor... {linkedinImportProgress}%
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         </ModalPortal>
