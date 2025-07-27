@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Header } from "@/components/dashboard/Header";
-import { Footer } from "@/components/layout/Footer";
-import { FaArrowLeft } from "react-icons/fa";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { FaArrowLeft, FaBriefcase } from "react-icons/fa";
 
 export default function CreatePositionPage() {
   const router = useRouter();
@@ -38,22 +37,34 @@ export default function CreatePositionPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-100">
-      <Header currentView="positions" />
-
-      <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
-        {/* Başlık ve Geri Butonu */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-semibold text-slate-800">
-            Yeni Pozisyon Ekle
-          </h1>
-          <button
-            onClick={handleBack}
-            className="hiri-button hiri-button-secondary text-sm py-2"
-          >
-            <FaArrowLeft className="mr-2" />
-            Pozisyon Listesine Dön
-          </button>
+    <DashboardLayout
+      title="Yeni Pozisyon Ekle - HiriBot"
+      activeSection="positions"
+    >
+      <div className="container mx-auto">
+        {/* Header Section with Gradient */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 text-white p-6 mb-6">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center">
+              <div className="mb-4 lg:mb-0">
+                <h1 className="text-3xl font-bold mb-1 flex items-center">
+                  <FaBriefcase className="mr-3 text-2xl" />
+                  Yeni Pozisyon Ekle
+                </h1>
+                <p className="text-purple-100 text-base">
+                  Yeni iş ilanı oluşturun ve adayları bekleyin
+                </p>
+              </div>
+              <button
+                onClick={handleBack}
+                className="bg-white/20 hover:bg-white/30 text-white font-medium py-2.5 px-5 rounded-xl transition-all duration-300 flex items-center text-sm border border-white/20"
+              >
+                <FaArrowLeft className="mr-2" />
+                Pozisyon Listesine Dön
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Form Kartı */}
@@ -100,9 +111,7 @@ export default function CreatePositionPage() {
             </button>
           </form>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

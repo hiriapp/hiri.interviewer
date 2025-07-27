@@ -2,23 +2,33 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Header } from "@/components/dashboard/Header";
-import { Footer } from "@/components/layout/Footer";
-import { FaPlus, FaEdit } from "react-icons/fa";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import {
+  FaPlus,
+  FaEdit,
+  FaBriefcase,
+  FaMapMarkerAlt,
+  FaClock,
+  FaUsers,
+  FaStar,
+  FaExternalLinkAlt,
+} from "react-icons/fa";
 
 // Dummy data - gerçek uygulamada API'den gelecek
 const DUMMY_POSITIONS = [
   {
     id: "pos1",
-    title: "Senior Software Developer - Turkcell",
-    description: `Turkcell olarak yeteneklerimize eşsiz insan deneyimi yaşatarak, değer yaratan sürdürülebilir bir organizasyon inşa etmeyi ve işveren markamızı zirveye taşımayı hedefliyoruz. Bu hedef doğrultusunda benimsediğimiz değerlerimizi iş yapış biçimlerimize yansıtıyoruz. 
-
-Ne Bekliyoruz?
-Tercihen yazılım mühendisliği, Bilgisayar Bilimleri veya ilgili bir alanda Lisans veya Yüksek Lisans derecesi olan,
-Profesyonel frontend geliştirme alanında en az 5 yıl deneyimi olan,
-React (Hooks, Context API ve/veya popüler state management kütüphaneleri - Redux, Zustand vb.) konusunda derinlemesine bilgi sahibi ve pratik deneyimi olan,
-Güçlü TypeScript bilgisi olan, HTML5 ve CSS3 konularında yetkin,
-RESTful API'leri tüketme konusunda kanıtlanmış deneyime sahip...`,
+    title: "Senior Software Developer",
+    company: "Kurum Teknoloji",
+    location: "İstanbul, Türkiye",
+    type: "Tam Zamanlı",
+    level: "Senior",
+    department: "Mühendislik",
+    status: "Aktif",
+    applicants: 24,
+    posted: "3 gün önce",
+    salary: "25.000 - 35.000 TL",
+    description: `Kurum olarak yeteneklerimize eşsiz insan deneyimi yaşatarak, değer yaratan sürdürülebilir bir organizasyon inşa etmeyi ve işveren markamızı zirveye taşımayı hedefliyoruz. Bu hedef doğrultusunda benimsediğimiz değerlerimizi iş yapış biçimlerimize yansıtıyoruz.`,
     requirements: [
       "React (Hooks, Context API, Redux/Zustand)",
       "TypeScript",
@@ -40,9 +50,18 @@ RESTful API'leri tüketme konusunda kanıtlanmış deneyime sahip...`,
   },
   {
     id: "pos2",
-    title: "Junior Marketing Specialist - Hiri Inc.",
+    title: "Junior Marketing Specialist",
+    company: "Hiri Inc.",
+    location: "İstanbul, Türkiye",
+    type: "Tam Zamanlı",
+    level: "Junior",
+    department: "Pazarlama",
+    status: "Aktif",
+    applicants: 12,
+    posted: "1 hafta önce",
+    salary: "15.000 - 20.000 TL",
     description:
-      "Hiri Inc. olarak pazarlama ekibimize dinamik, öğrenmeye açık bir Junior Marketing Specialist arıyoruz. İnovasyon, müşteri odaklılık ve takım çalışması değerlerimizle uyumlu adayları bekliyoruz.\n\nNe Bekliyoruz?\nPazarlama, İletişim veya ilgili bir alanda Lisans derecesi,\n0-2 yıl dijital pazarlama deneyimi (stajlar dahil),\nTemel SEO/SEM bilgisi ve Google Analytics aşinalığı,\nİçerik üretme ve etkili hikaye anlatma becerisi,\nSosyal medya platformlarına (Instagram, LinkedIn, Twitter) ve yönetim araçlarına hakimiyet...",
+      "Hiri Inc. olarak pazarlama ekibimize dinamik, öğrenmeye açık bir Junior Marketing Specialist arıyoruz. İnovasyon, müşteri odaklılık ve takım çalışması değerlerimizle uyumlu adayları bekliyoruz.",
     requirements: [
       "Pazarlama, İletişim veya ilgili alanda Lisans",
       "0-2 yıl dijital pazarlama deneyimi",
@@ -66,7 +85,8 @@ export default function PositionsPage() {
   const filteredPositions = DUMMY_POSITIONS.filter(
     (position) =>
       position.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      position.description.toLowerCase().includes(searchTerm.toLowerCase())
+      position.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      position.company.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleNewPosition = () => {
@@ -77,80 +97,238 @@ export default function PositionsPage() {
     router.push(`/positions/${position.id}/edit`);
   };
 
-  return (
-    <div className="flex flex-col min-h-screen bg-slate-100">
-      <Header currentView="positions" />
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Aktif":
+        return "bg-green-100 text-green-700";
+      case "Pasif":
+        return "bg-gray-100 text-gray-700";
+      case "Dolu":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
 
-      <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
-        {/* Başlık ve Yeni Pozisyon Butonu */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
-          <h1 className="text-3xl font-semibold text-slate-800 mb-4 sm:mb-0">
-            Pozisyonlar
-          </h1>
-          <button
-            onClick={handleNewPosition}
-            className="hiri-button hiri-button-primary text-sm py-2.5"
-          >
-            <FaPlus className="mr-2" /> Yeni Pozisyon Ekle
-          </button>
+  const getLevelColor = (level: string) => {
+    switch (level) {
+      case "Senior":
+        return "bg-purple-100 text-purple-700";
+      case "Mid":
+        return "bg-blue-100 text-blue-700";
+      case "Junior":
+        return "bg-green-100 text-green-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  return (
+    <DashboardLayout title="Pozisyonlar - HiriBot" activeSection="positions">
+      <div className="container mx-auto">
+        {/* Header Section with Gradient */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 text-white p-6 mb-6">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center">
+              <div className="mb-4 lg:mb-0">
+                <h1 className="text-3xl font-bold mb-1 flex items-center">
+                  <FaBriefcase className="mr-3 text-2xl" />
+                  Pozisyonlar
+                </h1>
+                <p className="text-purple-100 text-base">
+                  Açık pozisyonları yönetin ve yeni fırsatlar yaratın
+                </p>
+              </div>
+              <button
+                onClick={handleNewPosition}
+                className="bg-white text-purple-700 hover:bg-purple-50 font-semibold py-2.5 px-5 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center text-sm"
+              >
+                <FaPlus className="mr-2" />
+                Yeni Pozisyon Ekle
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Ana Kart */}
-        <div className="hiri-card">
-          {/* Arama ve Sayaç */}
-          <div className="flex justify-between items-center mb-5">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="hiri-input w-full sm:w-1/3 text-sm"
-              placeholder="Pozisyon ara..."
-            />
-            <span className="text-sm text-slate-500">
-              {filteredPositions.length} Pozisyon Gösteriliyor
-            </span>
-          </div>
+        {/* Search and Stats */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-6">
+          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center">
+            <div className="w-full md:flex-1 md:max-w-md">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-sm"
+                  placeholder="Pozisyon, şirket veya departman ara..."
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg
+                    className="h-4 w-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
 
-          {/* Pozisyon Listesi */}
-          <div className="space-y-4">
-            {filteredPositions.length === 0 ? (
-              <p className="text-center text-slate-500 italic py-4">
-                Arama kriterlerinize uygun pozisyon bulunamadı.
-              </p>
-            ) : (
-              filteredPositions.map((position) => (
-                <div
-                  key={position.id}
-                  className="hiri-card flex justify-between items-start hover:shadow-lg transition-shadow duration-300"
-                >
-                  <div>
-                    <h3 className="text-lg font-semibold text-hiri-purple mb-1">
-                      {position.title}
-                    </h3>
-                    <p className="text-xs text-slate-500 mb-2">
-                      ID: {position.id}
-                    </p>
-                    <p className="text-sm text-slate-600 leading-relaxed">
-                      {position.description.substring(0, 150)}...
-                    </p>
+            <div className="flex items-center justify-between md:justify-end gap-4 md:gap-6 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
+                <span className="font-medium">
+                  {filteredPositions.length} Pozisyon
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FaUsers className="text-purple-500 text-xs" />
+                <span className="font-medium">
+                  {filteredPositions.reduce(
+                    (acc, pos) => acc + pos.applicants,
+                    0
+                  )}{" "}
+                  Başvuru
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Positions Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {filteredPositions.length === 0 ? (
+            <div className="col-span-2 text-center py-16">
+              <div className="max-w-md mx-auto">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FaBriefcase className="text-3xl text-gray-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                  Pozisyon Bulunamadı
+                </h3>
+                <p className="text-gray-500">
+                  Arama kriterlerinize uygun pozisyon bulunamadı. Farklı anahtar
+                  kelimeler deneyin.
+                </p>
+              </div>
+            </div>
+          ) : (
+            filteredPositions.map((position) => (
+              <div
+                key={position.id}
+                className="group relative bg-white rounded-2xl border border-gray-200 hover:border-purple-300 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
+              >
+                {/* Card Header with Gradient */}
+                <div className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white p-6 pb-8">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold mb-1 group-hover:text-purple-100 transition-colors">
+                        {position.title}
+                      </h3>
+                      <p className="text-purple-100 font-medium">
+                        {position.company}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                          position.status
+                        )}`}
+                      >
+                        {position.status}
+                      </span>
+                    </div>
                   </div>
-                  <div className="ml-4 flex-shrink-0">
-                    <button
-                      onClick={() => handleEditPosition(position)}
-                      className="hiri-button hiri-button-secondary text-xs py-1 px-3"
-                    >
-                      <FaEdit className="mr-1" />
-                      Düzenle/Gör
-                    </button>
+
+                  <div className="flex flex-wrap gap-4 text-sm text-purple-100">
+                    <div className="flex items-center gap-1">
+                      <FaMapMarkerAlt />
+                      <span>{position.location}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FaClock />
+                      <span>{position.type}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FaUsers />
+                      <span>{position.applicants} başvuru</span>
+                    </div>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
-        </div>
-      </main>
 
-      <Footer />
-    </div>
+                {/* Card Body */}
+                <div className="p-6 pt-0">
+                  {/* Position Info */}
+                  <div className="relative -mt-4 mb-6">
+                    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                      <div className="flex flex-wrap gap-3 mb-3">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${getLevelColor(
+                            position.level
+                          )}`}
+                        >
+                          {position.level} Level
+                        </span>
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                          {position.department}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                        {position.description.substring(0, 120)}...
+                      </p>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-500">{position.posted}</span>
+                        <span className="font-semibold text-green-600">
+                          {position.salary}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Skills Tags */}
+                  <div className="mb-6">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                      Aranan Yetenekler
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {position.requirements.slice(0, 4).map((skill, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs font-medium border border-purple-200"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                      {position.requirements.length > 4 && (
+                        <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium">
+                          +{position.requirements.length - 4} daha
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <button
+                    onClick={() => handleEditPosition(position)}
+                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2"
+                  >
+                    <FaEdit />
+                    Pozisyonu Düzenle
+                    <FaExternalLinkAlt className="text-xs" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </DashboardLayout>
   );
 }

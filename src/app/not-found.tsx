@@ -1,18 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Header } from "@/components/dashboard/Header";
-import { Footer } from "@/components/layout/Footer";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { FaHome, FaSearch, FaUserPlus, FaChevronLeft } from "react-icons/fa";
 
 export default function NotFound() {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-purple-50">
-      <Header currentView="" />
-
-      <main className="flex-grow flex items-center justify-center px-4 py-12">
+    <DashboardLayout title="Sayfa Bulunamadı - HiriBot" activeSection="">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 -m-6">
         <div className="max-w-2xl mx-auto text-center">
           {/* 404 Ilustrasyon */}
           <div className="mb-8">
@@ -115,9 +112,7 @@ export default function NotFound() {
             </p>
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

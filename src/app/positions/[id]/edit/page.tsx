@@ -2,16 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Header } from "@/components/dashboard/Header";
-import { Footer } from "@/components/layout/Footer";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { FaArrowLeft } from "react-icons/fa";
 
 // Dummy data - gerçek uygulamada API'den gelecek
 const DUMMY_POSITIONS = [
   {
     id: "pos1",
-    title: "Senior Software Developer - Turkcell",
-    description: `Turkcell olarak yeteneklerimize eşsiz insan deneyimi yaşatarak, değer yaratan sürdürülebilir bir organizasyon inşa etmeyi ve işveren markamızı zirveye taşımayı hedefliyoruz. Bu hedef doğrultusunda benimsediğimiz değerlerimizi iş yapış biçimlerimize yansıtıyoruz. 
+    title: "Senior Software Developer - Kurum",
+    description: `Kurum olarak yeteneklerimize eşsiz insan deneyimi yaşatarak, değer yaratan sürdürülebilir bir organizasyon inşa etmeyi ve işveren markamızı zirveye taşımayı hedefliyoruz. Bu hedef doğrultusunda benimsediğimiz değerlerimizi iş yapış biçimlerimize yansıtıyoruz. 
 
 Ne Bekliyoruz?
 Tercihen yazılım mühendisliği, Bilgisayar Bilimleri veya ilgili bir alanda Lisans veya Yüksek Lisans derecesi olan,
@@ -120,18 +119,19 @@ export default function EditPositionPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col min-h-screen bg-slate-100">
-        <Header currentView="positions" />
-        <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
+      <DashboardLayout
+        title="Pozisyon Düzenle - HiriBot"
+        activeSection="positions"
+      >
+        <div className="container mx-auto">
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hiri-purple mx-auto"></div>
             <p className="mt-4 text-slate-600">
               Pozisyon bilgileri yükleniyor...
             </p>
           </div>
-        </main>
-        <Footer />
-      </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -139,9 +139,11 @@ export default function EditPositionPage() {
 
   if (!position) {
     return (
-      <div className="flex flex-col min-h-screen bg-slate-100">
-        <Header currentView="positions" />
-        <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
+      <DashboardLayout
+        title="Pozisyon Bulunamadı - HiriBot"
+        activeSection="positions"
+      >
+        <div className="container mx-auto">
           <div className="text-center py-12">
             <h1 className="text-2xl font-bold text-slate-800 mb-4">
               Pozisyon bulunamadı
@@ -154,17 +156,17 @@ export default function EditPositionPage() {
               Pozisyon Listesine Dön
             </button>
           </div>
-        </main>
-        <Footer />
-      </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-100">
-      <Header currentView="positions" />
-
-      <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
+    <DashboardLayout
+      title="Pozisyon Düzenle - HiriBot"
+      activeSection="positions"
+    >
+      <div className="container mx-auto">
         {/* Başlık ve Geri Butonu */}
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -235,9 +237,7 @@ export default function EditPositionPage() {
             </div>
           </form>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Header } from "@/components/dashboard/Header";
-import { Footer } from "@/components/layout/Footer";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { SuccessModal, ErrorModal, ProgressModal } from "@/components/ui";
 import { DUMMY_CANDIDATES } from "@/lib/dummy-data";
 import {
@@ -22,7 +21,7 @@ import {
 const DUMMY_POSITIONS = [
   {
     id: "pos1",
-    title: "Senior Software Developer - Turkcell",
+    title: "Senior Software Developer - Kurum",
   },
   {
     id: "pos2",
@@ -383,22 +382,34 @@ EĞİTİM
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-100">
-      <Header currentView="candidates" />
-
-      <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
-        {/* Başlık ve Geri Butonu */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-          <h1 className="text-3xl font-semibold text-slate-800 mb-4 sm:mb-0">
-            Yeni Aday Oluştur
-          </h1>
-          <button
-            onClick={() => router.push("/candidates")}
-            className="hiri-button hiri-button-secondary"
-          >
-            <FaArrowLeft className="mr-2" />
-            Aday Listesine Dön
-          </button>
+    <DashboardLayout
+      title="Yeni Aday Oluştur - HiriBot"
+      activeSection="candidates"
+    >
+      <div className="container mx-auto">
+        {/* Header Section with Gradient */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 text-white p-6 mb-6">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center">
+              <div className="mb-4 lg:mb-0">
+                <h1 className="text-3xl font-bold mb-1 flex items-center">
+                  <FaUser className="mr-3 text-2xl" />
+                  Yeni Aday Oluştur
+                </h1>
+                <p className="text-purple-100 text-base">
+                  Sisteme yeni aday ekleyin ve profilini oluşturun
+                </p>
+              </div>
+              <button
+                onClick={() => router.push("/candidates")}
+                className="bg-white/20 hover:bg-white/30 text-white font-medium py-2.5 px-5 rounded-xl transition-all duration-300 flex items-center text-sm border border-white/20"
+              >
+                <FaArrowLeft className="mr-2" />
+                Aday Listesine Dön
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Ana Kart */}
@@ -839,9 +850,7 @@ EĞİTİM
             </div>
           )}
         </div>
-      </main>
-
-      <Footer />
+      </div>
 
       {/* Modals */}
       <SuccessModal
@@ -864,6 +873,6 @@ EĞİTİM
         message="LinkedIn'den adaylar aktarılıyor, lütfen bekleyin..."
         progress={linkedinImportProgress}
       />
-    </div>
+    </DashboardLayout>
   );
 }

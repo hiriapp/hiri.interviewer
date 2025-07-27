@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
-import { Header } from "@/components/dashboard/Header";
-import { Footer } from "@/components/layout/Footer";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
   FaArrowLeft,
   FaFileAlt,
@@ -744,24 +743,23 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
 
   if (!candidate) {
     return (
-      <div className="flex flex-col min-h-screen bg-slate-100">
-        <Header currentView="candidates" />
-        <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
-          <div className="text-center py-12">
-            <h1 className="text-2xl font-bold text-slate-800 mb-4">
-              Aday bulunamadı
-            </h1>
-            <button
-              onClick={() => router.push("/candidates")}
-              className="hiri-button hiri-button-secondary text-sm py-2"
-            >
-              <FaArrowLeft className="mr-2" />
-              Aday Listesine Dön
-            </button>
-          </div>
-        </main>
-        <Footer />
-      </div>
+      <DashboardLayout
+        title="Aday Bulunamadı - HiriBot"
+        activeSection="candidates"
+      >
+        <div className="text-center py-12">
+          <h1 className="text-2xl font-bold text-slate-800 mb-4">
+            Aday bulunamadı
+          </h1>
+          <button
+            onClick={() => router.push("/candidates")}
+            className="hiri-button hiri-button-secondary text-sm py-2"
+          >
+            <FaArrowLeft className="mr-2" />
+            Aday Listesine Dön
+          </button>
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -784,10 +782,8 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-100">
-      <Header currentView="candidates" />
-
-      <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
+    <DashboardLayout title="Aday Detayı - HiriBot" activeSection="candidates">
+      <div className="container mx-auto">
         {/* Üst Navigasyon */}
         <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:justify-between sm:items-center">
           <button
@@ -1299,9 +1295,7 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
             </div>
           )}
         </div>
-      </main>
-
-      <Footer />
+      </div>
 
       {/* --- MODALS (Portal ile) --- */}
       {showCvModal && (
@@ -2398,6 +2392,6 @@ TAKIM ÇALIŞMASI VE İLETİŞİM
           </div>
         </ModalPortal>
       )}
-    </div>
+    </DashboardLayout>
   );
 }

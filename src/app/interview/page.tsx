@@ -427,10 +427,10 @@ export default function InterviewPage() {
         <div className="flex justify-between items-center border-b border-gray-200 pb-4 mb-4">
           <div>
             <div className="text-xl font-semibold">
-              Turkcell HiriBot Mülakat Daveti
+              Kurum HiriBot Mülakat Daveti
             </div>
             <div className="text-sm text-gray-600">
-              Turkcell İnsan Kaynakları &lt;hr@turkcell.com.tr&gt;
+              Kurum İnsan Kaynakları &lt;hr@kurum.com.tr&gt;
             </div>
           </div>
           <div className="text-sm text-gray-500">Bugün, 14:30</div>
@@ -439,7 +439,7 @@ export default function InterviewPage() {
         <div className="space-y-4 text-gray-700">
           <p>Merhaba Aday,</p>
           <p>
-            Turkcell&apos;e başvurunuz için teşekkür ederiz. Değerlendirme
+            Kurum&apos;a başvurunuz için teşekkür ederiz. Değerlendirme
             sürecimizin bir parçası olarak, AI destekli mülakat asistanımız
             HiriBot ile etkileşimli bir mülakata davet ediliyorsunuz.
           </p>
@@ -463,7 +463,7 @@ export default function InterviewPage() {
           <p className="mt-2">
             Saygılarımızla,
             <br />
-            Turkcell İnsan Kaynakları Ekibi
+            Kurum İnsan Kaynakları Ekibi
           </p>
         </div>
       </Card>

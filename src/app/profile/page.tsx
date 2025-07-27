@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Header } from "@/components/dashboard/Header";
-import { Footer } from "@/components/layout/Footer";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import {
@@ -22,22 +21,22 @@ import {
   FaCheck,
   FaTimes,
   FaBriefcase,
+  FaCog,
 } from "react-icons/fa";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [currentPage] = useState("profile"); // Header navigation için
-  const [currentView, setCurrentView] = useState("profile"); // Profil sekmeleri için
+  const [currentPage] = useState("profile");
+  const [currentView, setCurrentView] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
-  // Form state
   const [profileData, setProfileData] = useState({
-    firstName: "Turkcell",
+    firstName: "Kurum",
     lastName: "Yöneticisi",
-    email: "admin@turkcell.com.tr",
-    company: "Turkcell Teknoloji",
+    email: "admin@kurum.com.tr",
+    company: "Kurum Teknoloji",
     department: "İnsan Kaynakları",
     position: "HR Müdürü",
     phone: "+90 555 123 45 67",
@@ -66,7 +65,6 @@ export default function ProfilePage() {
 
   const renderProfileForm = () => (
     <div className="space-y-6">
-      {/* Profil Fotoğrafı */}
       <div className="flex flex-col items-center space-y-4">
         <div className="relative">
           <div className="w-24 h-24 bg-gradient-to-br from-hiri-purple to-hiri-blue rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
@@ -85,7 +83,6 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Kişisel Bilgiler */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -208,7 +205,6 @@ export default function ProfilePage() {
 
   const renderSettings = () => (
     <div className="space-y-6">
-      {/* Bildirim Ayarları */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -258,14 +254,28 @@ export default function ProfilePage() {
                   }
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-hiri-purple/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-hiri-purple"></div>
+                <div className="relative inline-block w-11 h-6">
+                  <div
+                    className={`w-11 h-6 rounded-full transition-colors ${
+                      settings[item.key as keyof typeof settings]
+                        ? "bg-hiri-purple"
+                        : "bg-gray-200"
+                    }`}
+                  />
+                  <div
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+                      settings[item.key as keyof typeof settings]
+                        ? "translate-x-5"
+                        : "translate-x-0"
+                    }`}
+                  />
+                </div>
               </label>
             </div>
           ))}
         </CardContent>
       </Card>
 
-      {/* Genel Ayarlar */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -324,7 +334,6 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      {/* Güvenlik */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -351,159 +360,159 @@ export default function ProfilePage() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header currentView={currentPage} />
-
-      <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
-        <div className="max-w-6xl mx-auto">
-          {/* Başlık ve Profil Özeti */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
-            <div className="flex items-center space-x-6 mb-6 lg:mb-0">
-              <div className="w-24 h-24 bg-gradient-to-br from-hiri-purple to-hiri-blue rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-xl">
-                T
+    <DashboardLayout title="Profil - HiriBot" activeSection="profile">
+      <div className="max-w-6xl mx-auto">
+        {/* Header Section with Gradient */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 text-white p-6 mb-6">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center">
+              <div className="mb-4 lg:mb-0 flex items-center space-x-4">
+                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-2xl font-bold border border-white/30">
+                  T
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold mb-1 flex items-center">
+                    <FaUser className="mr-3 text-2xl" />
+                    Profil Ayarları
+                  </h1>
+                  <p className="text-purple-100 text-base">
+                    Hesap bilgilerinizi ve tercihlerinizi yönetin
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {profileData.firstName} {profileData.lastName}
-                </h1>
-                <p className="text-gray-600 mt-1 text-lg font-medium">
-                  {profileData.position}
-                </p>
-                <p className="text-gray-500 text-sm">{profileData.company}</p>
-              </div>
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                className="bg-white text-purple-700 hover:bg-purple-50 font-semibold py-2.5 px-5 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center text-sm"
+              >
+                <FaEdit className="mr-2" />
+                {isEditing ? "Düzenlemeyi Bitir" : "Bilgileri Düzenle"}
+              </button>
             </div>
+          </div>
+        </div>
 
-            {/* Başarı Bildirimi */}
-            {showSaveSuccess && (
-              <div className="fixed top-4 right-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center">
-                <FaCheck className="mr-2" />
-                Değişiklikler başarıyla kaydedildi!
+        {showSaveSuccess && (
+          <div className="fixed top-4 right-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center">
+            <FaCheck className="mr-2" />
+            Değişiklikler başarıyla kaydedildi!
+          </div>
+        )}
+
+        <div className="border-b border-gray-200 mb-8">
+          <nav className="flex space-x-8">
+            <button
+              onClick={() => setCurrentView("profile")}
+              className={`relative py-4 px-1 text-sm font-medium transition-all duration-200 ${
+                currentView === "profile"
+                  ? "text-hiri-purple border-b-2 border-hiri-purple"
+                  : "text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300"
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <div
+                  className={`w-6 h-6 rounded-lg flex items-center justify-center ${
+                    currentView === "profile"
+                      ? "bg-hiri-purple text-white"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  <FaUser className="text-xs" />
+                </div>
+                <span>Profil Bilgileri</span>
               </div>
-            )}
-          </div>
+              {currentView === "profile" && (
+                <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-hiri-purple to-hiri-blue"></div>
+              )}
+            </button>
 
-          {/* Tab Navigation */}
-          <div className="border-b border-gray-200 mb-8">
-            <nav className="flex space-x-8">
-              <button
-                onClick={() => setCurrentView("profile")}
-                className={`relative py-4 px-1 text-sm font-medium transition-all duration-200 ${
-                  currentView === "profile"
-                    ? "text-hiri-purple border-b-2 border-hiri-purple"
-                    : "text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300"
-                }`}
-              >
-                <div className="flex items-center space-x-2">
-                  <div
-                    className={`w-6 h-6 rounded-lg flex items-center justify-center ${
-                      currentView === "profile"
-                        ? "bg-hiri-purple text-white"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    <FaUser className="text-xs" />
-                  </div>
-                  <span>Profil Bilgileri</span>
+            <button
+              onClick={() => setCurrentView("settings")}
+              className={`relative py-4 px-1 text-sm font-medium transition-all duration-200 ${
+                currentView === "settings"
+                  ? "text-hiri-purple border-b-2 border-hiri-purple"
+                  : "text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300"
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <div
+                  className={`w-6 h-6 rounded-lg flex items-center justify-center ${
+                    currentView === "settings"
+                      ? "bg-hiri-purple text-white"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  <FaBell className="text-xs" />
                 </div>
-                {currentView === "profile" && (
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-hiri-purple to-hiri-blue"></div>
-                )}
-              </button>
+                <span>Ayarlar</span>
+              </div>
+              {currentView === "settings" && (
+                <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-hiri-purple to-hiri-blue"></div>
+              )}
+            </button>
+          </nav>
+        </div>
 
-              <button
-                onClick={() => setCurrentView("settings")}
-                className={`relative py-4 px-1 text-sm font-medium transition-all duration-200 ${
-                  currentView === "settings"
-                    ? "text-hiri-purple border-b-2 border-hiri-purple"
-                    : "text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300"
-                }`}
-              >
-                <div className="flex items-center space-x-2">
-                  <div
-                    className={`w-6 h-6 rounded-lg flex items-center justify-center ${
-                      currentView === "settings"
-                        ? "bg-hiri-purple text-white"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    <FaBell className="text-xs" />
-                  </div>
-                  <span>Ayarlar</span>
-                </div>
-                {currentView === "settings" && (
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-hiri-purple to-hiri-blue"></div>
-                )}
-              </button>
-            </nav>
-          </div>
-
-          {/* Ana İçerik */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xl">
-                  {currentView === "profile"
-                    ? "Profil Bilgileri"
-                    : "Ayarlar ve Tercihler"}
-                </CardTitle>
-                {currentView === "profile" && (
-                  <div className="flex space-x-2">
-                    {isEditing ? (
-                      <>
-                        <Button
-                          onClick={() => setIsEditing(false)}
-                          variant="outline"
-                          size="sm"
-                        >
-                          <FaTimes className="mr-2" />
-                          İptal
-                        </Button>
-                        <Button onClick={handleSave} size="sm">
-                          <FaSave className="mr-2" />
-                          Kaydet
-                        </Button>
-                      </>
-                    ) : (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl">
+                {currentView === "profile"
+                  ? "Profil Bilgileri"
+                  : "Ayarlar ve Tercihler"}
+              </CardTitle>
+              {currentView === "profile" && (
+                <div className="flex space-x-2">
+                  {isEditing ? (
+                    <>
                       <Button
-                        onClick={() => setIsEditing(true)}
+                        onClick={() => setIsEditing(false)}
                         variant="outline"
                         size="sm"
                       >
-                        <FaEdit className="mr-2" />
-                        Düzenle
+                        <FaTimes className="mr-2" />
+                        İptal
                       </Button>
-                    )}
-                  </div>
-                )}
-                {currentView === "settings" && (
-                  <Button onClick={handleSave} size="sm">
-                    <FaSave className="mr-2" />
-                    Kaydet
-                  </Button>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="p-8">
-              {currentView === "profile"
-                ? renderProfileForm()
-                : renderSettings()}
-            </CardContent>
-          </Card>
+                      <Button onClick={handleSave} size="sm">
+                        <FaSave className="mr-2" />
+                        Kaydet
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      onClick={() => setIsEditing(true)}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <FaEdit className="mr-2" />
+                      Düzenle
+                    </Button>
+                  )}
+                </div>
+              )}
+              {currentView === "settings" && (
+                <Button onClick={handleSave} size="sm">
+                  <FaSave className="mr-2" />
+                  Kaydet
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="p-8">
+            {currentView === "profile" ? renderProfileForm() : renderSettings()}
+          </CardContent>
+        </Card>
 
-          {/* Alt Kısım - Çıkış Butonu */}
-          <div className="mt-8 flex justify-end">
-            <button
-              onClick={handleSignOut}
-              className="flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all duration-200 border border-red-200 hover:border-red-600"
-            >
-              <FaSignOutAlt className="mr-2" />
-              Çıkış Yap
-            </button>
-          </div>
+        <div className="mt-8 flex justify-end">
+          <button
+            onClick={handleSignOut}
+            className="flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all duration-200 border border-red-200 hover:border-red-600"
+          >
+            <FaSignOutAlt className="mr-2" />
+            Çıkış Yap
+          </button>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

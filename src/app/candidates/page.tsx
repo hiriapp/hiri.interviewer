@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Header } from "@/components/dashboard/Header";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Footer } from "@/components/layout/Footer";
 import { SuccessModal, ErrorModal, ConfirmationModal } from "@/components/ui";
 import {
@@ -15,6 +15,8 @@ import {
   FaEye,
   FaFileAlt,
   FaSyncAlt,
+  FaUsers,
+  FaPlus,
 } from "react-icons/fa";
 import { DUMMY_CANDIDATES, AI_COMPARISON_ANALYSES } from "@/lib/dummy-data";
 
@@ -703,39 +705,48 @@ export default function CandidatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header currentView={currentView} />
-
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Başlık */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Aday Havuzu
-            </h1>
-            <button
-              onClick={() => {
-                setCandidates([...DUMMY_CANDIDATES]);
-                setModalContent({
-                  title: "Liste Yenilendi",
-                  message: `${DUMMY_CANDIDATES.length} aday yüklendi.`,
-                });
-                setShowSuccessModal(true);
-              }}
-              className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors"
-              title="Listeyi Yenile"
-            >
-              <FaSyncAlt className="w-3 h-3 mr-1" />
-              Yenile
-            </button>
+    <DashboardLayout title="Aday Havuzu - HiriBot" activeSection="candidates">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section with Gradient */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 text-white p-6 mb-6">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center">
+              <div className="mb-4 lg:mb-0">
+                <h1 className="text-3xl font-bold mb-1 flex items-center">
+                  <FaUsers className="mr-3 text-2xl" />
+                  Adaylar
+                </h1>
+                <p className="text-purple-100 text-base">
+                  Aday havuzunuzu yönetin ve yetenekleri keşfedin
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setCandidates([...DUMMY_CANDIDATES]);
+                    setModalContent({
+                      title: "Liste Yenilendi",
+                      message: `${DUMMY_CANDIDATES.length} aday yüklendi.`,
+                    });
+                    setShowSuccessModal(true);
+                  }}
+                  className="bg-white/20 hover:bg-white/30 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 flex items-center text-sm border border-white/20"
+                  title="Listeyi Yenile"
+                >
+                  <FaSyncAlt className="mr-2" />
+                  Yenile
+                </button>
+                <button
+                  onClick={() => router.push("/candidates/create")}
+                  className="bg-white text-purple-700 hover:bg-purple-50 font-semibold py-2.5 px-5 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center text-sm"
+                >
+                  <FaPlus className="mr-2" />
+                  Yeni Aday Ekle
+                </button>
+              </div>
+            </div>
           </div>
-          <button
-            onClick={() => router.push("/candidates/create")}
-            className="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors w-full sm:w-auto justify-center"
-          >
-            <FaUserPlus className="w-4 h-4 mr-2" />
-            Yeni Aday
-          </button>
         </div>
 
         {/* Filtreler - Responsive */}
@@ -1066,701 +1077,703 @@ export default function CandidatesPage() {
             )}
           </div>
         </div>
-      </main>
 
-      <Footer />
-
-      {/* CV Modal */}
-      {showCvModal && (
-        <ModalPortal>
-          <div
-            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4"
-            style={{ zIndex: 9999 }}
-            onClick={() => setShowCvModal(false)}
-          >
+        {/* CV Modal */}
+        {showCvModal && (
+          <ModalPortal>
             <div
-              className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col"
-              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4"
+              style={{ zIndex: 9999 }}
+              onClick={() => setShowCvModal(false)}
             >
-              <div className="flex justify-between items-center p-6 border-b">
-                <h2 className="text-xl sm:text-2xl font-semibold text-gray-700">
-                  {selectedCandidateName} - CV İçeriği
-                </h2>
-                <button
-                  onClick={() => setShowCvModal(false)}
-                  className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
-                >
-                  ×
-                </button>
-              </div>
-              <div className="flex-grow overflow-auto p-6">
-                <pre className="bg-gray-50 p-4 rounded-md text-xs leading-relaxed whitespace-pre-wrap font-mono">
-                  {selectedCvText}
-                </pre>
+              <div
+                className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center p-6 border-b">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-gray-700">
+                    {selectedCandidateName} - CV İçeriği
+                  </h2>
+                  <button
+                    onClick={() => setShowCvModal(false)}
+                    className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="flex-grow overflow-auto p-6">
+                  <pre className="bg-gray-50 p-4 rounded-md text-xs leading-relaxed whitespace-pre-wrap font-mono">
+                    {selectedCvText}
+                  </pre>
+                </div>
               </div>
             </div>
-          </div>
-        </ModalPortal>
-      )}
+          </ModalPortal>
+        )}
 
-      {/* Single Interview Setup Modal */}
-      {showInterviewSetupModal && (
-        <ModalPortal>
-          <div
-            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4"
-            style={{ zIndex: 9999 }}
-            onClick={() => setShowInterviewSetupModal(false)}
-          >
+        {/* Single Interview Setup Modal */}
+        {showInterviewSetupModal && (
+          <ModalPortal>
             <div
-              className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4"
+              style={{ zIndex: 9999 }}
+              onClick={() => setShowInterviewSetupModal(false)}
             >
-              <div className="flex justify-between items-center p-4 sm:p-6 border-b">
-                <h2 className="text-lg sm:text-xl font-semibold">
-                  HiriBot Mülakatı Başlat
-                </h2>
-                <button
-                  onClick={() => setShowInterviewSetupModal(false)}
-                  className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
-                >
-                  ×
-                </button>
-              </div>
-              <div className="flex-grow overflow-auto p-4 sm:p-6">
-                <p className="mb-4 text-sm sm:text-base">
-                  Seçilen Aday:{" "}
-                  <strong>
-                    {selectedCandidateForInterview?.name}{" "}
-                    {selectedCandidateForInterview?.surname}
-                  </strong>{" "}
-                  - {selectedCandidateForInterview?.position}
-                </p>
-
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
-                  <h3 className="font-semibold text-purple-800 mb-2">
-                    CV Analizi Özeti (Simülasyon)
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    HiriBot, adayın CV'sini otomatik olarak analiz etti:
-                  </p>
-                  <ul className="list-disc list-inside text-sm text-gray-600">
-                    <li>
-                      Belirtilen Yetkinlikler: Proje Yönetimi, Python, Veri
-                      Analizi
-                    </li>
-                    <li>
-                      Eksik/Net Olmayan Alanlar: Liderlik Deneyimi, Çatışma
-                      Çözme Becerisi
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Şablon Yükle */}
-                <div className="mb-6">
-                  <label className="block text-base font-semibold mb-2">
-                    Şablon Yükle:
-                  </label>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Önceden kaydettiğiniz bir soru şablonunu yükleyerek mevcut
-                    seçimleri otomatik doldurun.
-                  </p>
-                  <div className="flex gap-2">
-                    <select
-                      value={selectedTemplate}
-                      onChange={(e) => setSelectedTemplate(e.target.value)}
-                      className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white"
-                    >
-                      <option value="">Şablon Seçiniz</option>
-                      {questionTemplates.map((template) => (
-                        <option key={template.id} value={template.id}>
-                          {template.name}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={() =>
-                        selectedTemplate &&
-                        loadTemplate(selectedTemplate, false)
-                      }
-                      disabled={!selectedTemplate}
-                      className="px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
-                    >
-                      Yükle
-                    </button>
-                  </div>
-                </div>
-
-                {/* Mülakat Dili */}
-                <div className="mb-6">
-                  <label className="block text-base font-semibold mb-2">
-                    Mülakat Dili:
-                  </label>
-                  <p className="text-sm text-gray-600 mb-3">
-                    HiriBot adayı bu dilde karşılayacak ve tüm mülakatı bu dilde
-                    yürütecektir.
-                  </p>
-                  <select
-                    value={interviewLanguage}
-                    onChange={(e) => setInterviewLanguage(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white"
+              <div
+                className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center p-4 sm:p-6 border-b">
+                  <h2 className="text-lg sm:text-xl font-semibold">
+                    HiriBot Mülakatı Başlat
+                  </h2>
+                  <button
+                    onClick={() => setShowInterviewSetupModal(false)}
+                    className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
                   >
-                    <option value="tr">Türkçe</option>
-                    <option value="en">English</option>
-                  </select>
+                    ×
+                  </button>
                 </div>
-
-                {/* İkinci Dil Yetkinliği */}
-                <div className="mb-6">
-                  <label className="block text-base font-semibold mb-2">
-                    Ek Dil Yetkinliği Değerlendir:
-                  </label>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Adayın mülakat sırasında ek bir dilde (örn. İngilizce)
-                    yetkinliğinin değerlendirilmesini ister misiniz?
+                <div className="flex-grow overflow-auto p-4 sm:p-6">
+                  <p className="mb-4 text-sm sm:text-base">
+                    Seçilen Aday:{" "}
+                    <strong>
+                      {selectedCandidateForInterview?.name}{" "}
+                      {selectedCandidateForInterview?.surname}
+                    </strong>{" "}
+                    - {selectedCandidateForInterview?.position}
                   </p>
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="checkbox"
-                      checked={assessSecondLanguage}
-                      onChange={(e) =>
-                        setAssessSecondLanguage(e.target.checked)
-                      }
-                      className="w-5 h-5 text-purple-600 rounded focus:ring-purple-500 border-gray-300"
-                    />
-                    <label className="text-gray-700 font-medium">
-                      İngilizce Yetkinliğini Değerlendir
+
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+                    <h3 className="font-semibold text-purple-800 mb-2">
+                      CV Analizi Özeti (Simülasyon)
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-2">
+                      HiriBot, adayın CV'sini otomatik olarak analiz etti:
+                    </p>
+                    <ul className="list-disc list-inside text-sm text-gray-600">
+                      <li>
+                        Belirtilen Yetkinlikler: Proje Yönetimi, Python, Veri
+                        Analizi
+                      </li>
+                      <li>
+                        Eksik/Net Olmayan Alanlar: Liderlik Deneyimi, Çatışma
+                        Çözme Becerisi
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Şablon Yükle */}
+                  <div className="mb-6">
+                    <label className="block text-base font-semibold mb-2">
+                      Şablon Yükle:
                     </label>
-                  </div>
-                </div>
-
-                {/* Yetkinlikler */}
-                <div className="mb-6">
-                  <label className="block text-base font-semibold mb-2">
-                    Pozisyona Özel Yetkinlikler (Soru Kütüphanesi):
-                  </label>
-                  <p className="text-sm text-gray-600 mb-3">
-                    HiriBot'un mülakat sırasında hangi yetkinlikler üzerine
-                    odaklanmasını istersiniz?
-                  </p>
-                  <div className="flex flex-wrap gap-2 bg-gray-50 border border-gray-200 rounded-lg p-4">
-                    {competencies.map((competency) => (
-                      <button
-                        key={competency}
-                        onClick={() => toggleCompetency(competency)}
-                        className={`px-3 py-2 rounded-md border font-medium transition-colors text-sm ${
-                          selectedCompetencies.has(competency)
-                            ? "bg-purple-600 text-white border-purple-600"
-                            : "bg-white text-gray-700 border-gray-300 hover:border-purple-300"
-                        }`}
-                      >
-                        {competency}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">
-                      Seçilen yetkinlikler:{" "}
-                      {selectedCompetencies.size > 0
-                        ? Array.from(selectedCompetencies).join(", ")
-                        : "Yok"}
+                    <p className="text-sm text-gray-600 mb-3">
+                      Önceden kaydettiğiniz bir soru şablonunu yükleyerek mevcut
+                      seçimleri otomatik doldurun.
                     </p>
-                  </div>
-                </div>
-
-                {/* Genel Konular */}
-                <div className="mb-6">
-                  <label className="block text-base font-semibold mb-2">
-                    Ek Bilgiler ve Özel Konular:
-                  </label>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Adaydan mülakat sırasında öğrenmek istediğiniz CV dışı genel
-                    bilgileri seçin.
-                  </p>
-                  <div className="flex flex-wrap gap-2 bg-gray-50 border border-gray-200 rounded-lg p-4">
-                    {generalTopics.map((topic) => (
-                      <button
-                        key={topic}
-                        onClick={() => toggleGeneralTopic(topic)}
-                        className={`px-3 py-2 rounded-md border font-medium transition-colors text-sm ${
-                          selectedGeneralTopics.has(topic)
-                            ? "bg-purple-600 text-white border-purple-600"
-                            : "bg-white text-gray-700 border-gray-300 hover:border-purple-300"
-                        }`}
+                    <div className="flex gap-2">
+                      <select
+                        value={selectedTemplate}
+                        onChange={(e) => setSelectedTemplate(e.target.value)}
+                        className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white"
                       >
-                        {topic}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">
-                      Seçilen konular:{" "}
-                      {selectedGeneralTopics.size > 0
-                        ? Array.from(selectedGeneralTopics).join(", ")
-                        : "Yok"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Manuel Soru Ekle */}
-                <div className="mb-6">
-                  <label className="block text-base font-semibold mb-2">
-                    Manuel Özel Soru Ekle:
-                  </label>
-                  <p className="text-sm text-gray-600 mb-3">
-                    HiriBot'un adaya sormasını istediğiniz spesifik bir soru
-                    ekleyin.
-                  </p>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={customQuestionInput}
-                      onChange={(e) => setCustomQuestionInput(e.target.value)}
-                      placeholder="Örn: X projesindeki rolünüz neydi?"
-                      className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                    />
-                    <button
-                      onClick={() => addCustomQuestion()}
-                      className="px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
-                    >
-                      Soru Ekle
-                    </button>
-                  </div>
-                  {manualQuestions.size > 0 && (
-                    <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600 mb-2">
-                        Eklenen manuel sorular:
-                      </p>
-                      <ul className="list-disc list-inside text-sm text-gray-600">
-                        {Array.from(manualQuestions).map((question, index) => (
-                          <li key={index}>{question}</li>
+                        <option value="">Şablon Seçiniz</option>
+                        {questionTemplates.map((template) => (
+                          <option key={template.id} value={template.id}>
+                            {template.name}
+                          </option>
                         ))}
-                      </ul>
+                      </select>
+                      <button
+                        onClick={() =>
+                          selectedTemplate &&
+                          loadTemplate(selectedTemplate, false)
+                        }
+                        disabled={!selectedTemplate}
+                        className="px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+                      >
+                        Yükle
+                      </button>
                     </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row justify-end gap-3 p-4 sm:p-6 border-t">
-                <button
-                  onClick={() => saveTemplate(false)}
-                  className="px-4 py-2 text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors"
-                >
-                  Şablon Olarak Kaydet
-                </button>
-                <button
-                  onClick={() => setShowInterviewSetupModal(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  İptal
-                </button>
-                <button
-                  onClick={handleStartInterviewProcess}
-                  className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                >
-                  Mülakatı Başlat
-                </button>
-              </div>
-            </div>
-          </div>
-        </ModalPortal>
-      )}
-
-      {/* Bulk Interview Setup Modal */}
-      {showBulkInterviewSetupModal && (
-        <ModalPortal>
-          <div
-            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4"
-            style={{ zIndex: 9999 }}
-            onClick={() => setShowBulkInterviewSetupModal(false)}
-          >
-            <div
-              className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-center p-4 sm:p-6 border-b">
-                <h2 className="text-lg sm:text-xl font-semibold">
-                  Toplu Mülakat Daveti Gönder
-                </h2>
-                <button
-                  onClick={() => setShowBulkInterviewSetupModal(false)}
-                  className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
-                >
-                  ×
-                </button>
-              </div>
-              <div className="flex-grow overflow-auto p-4 sm:p-6">
-                <p className="mb-4 text-sm sm:text-base">
-                  <strong>{selectedCandidates.size}</strong> Aday için toplu
-                  mülakat ayarları:
-                </p>
-
-                {/* Şablon Yükle */}
-                <div className="mb-6">
-                  <label className="block text-base font-semibold mb-2">
-                    Şablon Yükle:
-                  </label>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Önceden kaydettiğiniz bir soru şablonunu yükleyerek mevcut
-                    seçimleri otomatik doldurun.
-                  </p>
-                  <div className="flex gap-2">
-                    <select
-                      value={bulkSelectedTemplate}
-                      onChange={(e) => setBulkSelectedTemplate(e.target.value)}
-                      className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white"
-                    >
-                      <option value="">Şablon Seçiniz</option>
-                      {questionTemplates.map((template) => (
-                        <option key={template.id} value={template.id}>
-                          {template.name}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={() =>
-                        bulkSelectedTemplate &&
-                        loadTemplate(bulkSelectedTemplate, true)
-                      }
-                      disabled={!bulkSelectedTemplate}
-                      className="px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
-                    >
-                      Yükle
-                    </button>
                   </div>
-                </div>
 
-                {/* Mülakat Dili */}
-                <div className="mb-6">
-                  <label className="block text-base font-semibold mb-2">
-                    Mülakat Dili:
-                  </label>
-                  <p className="text-sm text-gray-600 mb-3">
-                    HiriBot adayları bu dilde karşılayacak ve tüm mülakatı bu
-                    dilde yürütecektir.
-                  </p>
-                  <select
-                    value={bulkInterviewLanguage}
-                    onChange={(e) => setBulkInterviewLanguage(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white"
-                  >
-                    <option value="tr">Türkçe</option>
-                    <option value="en">English</option>
-                  </select>
-                </div>
-
-                {/* İkinci Dil Yetkinliği */}
-                <div className="mb-6">
-                  <label className="block text-base font-semibold mb-2">
-                    Ek Dil Yetkinliği Değerlendir:
-                  </label>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Adayların mülakat sırasında ek bir dilde (örn. İngilizce)
-                    yetkinliğinin değerlendirilmesini ister misiniz?
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="checkbox"
-                      checked={bulkAssessSecondLanguage}
-                      onChange={(e) =>
-                        setBulkAssessSecondLanguage(e.target.checked)
-                      }
-                      className="w-5 h-5 text-purple-600 rounded focus:ring-purple-500 border-gray-300"
-                    />
-                    <label className="text-gray-700 font-medium">
-                      İngilizce Yetkinliğini Değerlendir
+                  {/* Mülakat Dili */}
+                  <div className="mb-6">
+                    <label className="block text-base font-semibold mb-2">
+                      Mülakat Dili:
                     </label>
-                  </div>
-                </div>
-
-                {/* Yetkinlikler */}
-                <div className="mb-6">
-                  <label className="block text-base font-semibold mb-2">
-                    Pozisyona Özel Yetkinlikler (Soru Kütüphanesi):
-                  </label>
-                  <p className="text-sm text-gray-600 mb-3">
-                    HiriBot'un mülakat sırasında hangi yetkinlikler üzerine
-                    odaklanmasını istersiniz?
-                  </p>
-                  <div className="flex flex-wrap gap-2 bg-gray-50 border border-gray-200 rounded-lg p-4">
-                    {competencies.map((competency) => (
-                      <button
-                        key={competency}
-                        onClick={() => toggleCompetency(competency, true)}
-                        className={`px-3 py-2 rounded-md border font-medium transition-colors text-sm ${
-                          bulkSelectedCompetencies.has(competency)
-                            ? "bg-purple-600 text-white border-purple-600"
-                            : "bg-white text-gray-700 border-gray-300 hover:border-purple-300"
-                        }`}
-                      >
-                        {competency}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">
-                      Seçilen yetkinlikler:{" "}
-                      {bulkSelectedCompetencies.size > 0
-                        ? Array.from(bulkSelectedCompetencies).join(", ")
-                        : "Yok"}
+                    <p className="text-sm text-gray-600 mb-3">
+                      HiriBot adayı bu dilde karşılayacak ve tüm mülakatı bu
+                      dilde yürütecektir.
                     </p>
-                  </div>
-                </div>
-
-                {/* Genel Konular */}
-                <div className="mb-6">
-                  <label className="block text-base font-semibold mb-2">
-                    Ek Bilgiler ve Özel Konular:
-                  </label>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Adaylardan mülakat sırasında öğrenmek istediğiniz CV dışı
-                    genel bilgileri seçin.
-                  </p>
-                  <div className="flex flex-wrap gap-2 bg-gray-50 border border-gray-200 rounded-lg p-4">
-                    {generalTopics.map((topic) => (
-                      <button
-                        key={topic}
-                        onClick={() => toggleGeneralTopic(topic, true)}
-                        className={`px-3 py-2 rounded-md border font-medium transition-colors text-sm ${
-                          bulkSelectedGeneralTopics.has(topic)
-                            ? "bg-purple-600 text-white border-purple-600"
-                            : "bg-white text-gray-700 border-gray-300 hover:border-purple-300"
-                        }`}
-                      >
-                        {topic}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">
-                      Seçilen konular:{" "}
-                      {bulkSelectedGeneralTopics.size > 0
-                        ? Array.from(bulkSelectedGeneralTopics).join(", ")
-                        : "Yok"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Manuel Soru Ekle */}
-                <div className="mb-6">
-                  <label className="block text-base font-semibold mb-2">
-                    Manuel Özel Soru Ekle:
-                  </label>
-                  <p className="text-sm text-gray-600 mb-3">
-                    HiriBot'un adaylara sormasını istediğiniz spesifik bir soru
-                    ekleyin.
-                  </p>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={bulkCustomQuestionInput}
-                      onChange={(e) =>
-                        setBulkCustomQuestionInput(e.target.value)
-                      }
-                      placeholder="Örn: X projesindeki rolünüz neydi?"
-                      className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                    />
-                    <button
-                      onClick={() => addCustomQuestion(true)}
-                      className="px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+                    <select
+                      value={interviewLanguage}
+                      onChange={(e) => setInterviewLanguage(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white"
                     >
-                      Soru Ekle
-                    </button>
+                      <option value="tr">Türkçe</option>
+                      <option value="en">English</option>
+                    </select>
                   </div>
-                  {bulkManualQuestions.size > 0 && (
+
+                  {/* İkinci Dil Yetkinliği */}
+                  <div className="mb-6">
+                    <label className="block text-base font-semibold mb-2">
+                      Ek Dil Yetkinliği Değerlendir:
+                    </label>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Adayın mülakat sırasında ek bir dilde (örn. İngilizce)
+                      yetkinliğinin değerlendirilmesini ister misiniz?
+                    </p>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="checkbox"
+                        checked={assessSecondLanguage}
+                        onChange={(e) =>
+                          setAssessSecondLanguage(e.target.checked)
+                        }
+                        className="w-5 h-5 text-purple-600 rounded focus:ring-purple-500 border-gray-300"
+                      />
+                      <label className="text-gray-700 font-medium">
+                        İngilizce Yetkinliğini Değerlendir
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Yetkinlikler */}
+                  <div className="mb-6">
+                    <label className="block text-base font-semibold mb-2">
+                      Pozisyona Özel Yetkinlikler (Soru Kütüphanesi):
+                    </label>
+                    <p className="text-sm text-gray-600 mb-3">
+                      HiriBot'un mülakat sırasında hangi yetkinlikler üzerine
+                      odaklanmasını istersiniz?
+                    </p>
+                    <div className="flex flex-wrap gap-2 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      {competencies.map((competency) => (
+                        <button
+                          key={competency}
+                          onClick={() => toggleCompetency(competency)}
+                          className={`px-3 py-2 rounded-md border font-medium transition-colors text-sm ${
+                            selectedCompetencies.has(competency)
+                              ? "bg-purple-600 text-white border-purple-600"
+                              : "bg-white text-gray-700 border-gray-300 hover:border-purple-300"
+                          }`}
+                        >
+                          {competency}
+                        </button>
+                      ))}
+                    </div>
                     <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600 mb-2">
-                        Eklenen manuel sorular:
+                      <p className="text-sm text-gray-600">
+                        Seçilen yetkinlikler:{" "}
+                        {selectedCompetencies.size > 0
+                          ? Array.from(selectedCompetencies).join(", ")
+                          : "Yok"}
                       </p>
-                      <ul className="list-disc list-inside text-sm text-gray-600">
-                        {Array.from(bulkManualQuestions).map(
-                          (question, index) => (
-                            <li key={index}>{question}</li>
-                          )
-                        )}
-                      </ul>
                     </div>
-                  )}
+                  </div>
+
+                  {/* Genel Konular */}
+                  <div className="mb-6">
+                    <label className="block text-base font-semibold mb-2">
+                      Ek Bilgiler ve Özel Konular:
+                    </label>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Adaydan mülakat sırasında öğrenmek istediğiniz CV dışı
+                      genel bilgileri seçin.
+                    </p>
+                    <div className="flex flex-wrap gap-2 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      {generalTopics.map((topic) => (
+                        <button
+                          key={topic}
+                          onClick={() => toggleGeneralTopic(topic)}
+                          className={`px-3 py-2 rounded-md border font-medium transition-colors text-sm ${
+                            selectedGeneralTopics.has(topic)
+                              ? "bg-purple-600 text-white border-purple-600"
+                              : "bg-white text-gray-700 border-gray-300 hover:border-purple-300"
+                          }`}
+                        >
+                          {topic}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-600">
+                        Seçilen konular:{" "}
+                        {selectedGeneralTopics.size > 0
+                          ? Array.from(selectedGeneralTopics).join(", ")
+                          : "Yok"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Manuel Soru Ekle */}
+                  <div className="mb-6">
+                    <label className="block text-base font-semibold mb-2">
+                      Manuel Özel Soru Ekle:
+                    </label>
+                    <p className="text-sm text-gray-600 mb-3">
+                      HiriBot'un adaya sormasını istediğiniz spesifik bir soru
+                      ekleyin.
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={customQuestionInput}
+                        onChange={(e) => setCustomQuestionInput(e.target.value)}
+                        placeholder="Örn: X projesindeki rolünüz neydi?"
+                        className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                      />
+                      <button
+                        onClick={() => addCustomQuestion()}
+                        className="px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+                      >
+                        Soru Ekle
+                      </button>
+                    </div>
+                    {manualQuestions.size > 0 && (
+                      <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                        <p className="text-sm text-gray-600 mb-2">
+                          Eklenen manuel sorular:
+                        </p>
+                        <ul className="list-disc list-inside text-sm text-gray-600">
+                          {Array.from(manualQuestions).map(
+                            (question, index) => (
+                              <li key={index}>{question}</li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row justify-end gap-3 p-4 sm:p-6 border-t">
+                  <button
+                    onClick={() => saveTemplate(false)}
+                    className="px-4 py-2 text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors"
+                  >
+                    Şablon Olarak Kaydet
+                  </button>
+                  <button
+                    onClick={() => setShowInterviewSetupModal(false)}
+                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    İptal
+                  </button>
+                  <button
+                    onClick={handleStartInterviewProcess}
+                    className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    Mülakatı Başlat
+                  </button>
                 </div>
               </div>
-
-              <div className="flex flex-col sm:flex-row justify-end gap-3 p-4 sm:p-6 border-t">
-                <button
-                  onClick={() => saveTemplate(true)}
-                  className="px-4 py-2 text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors"
-                >
-                  Şablon Olarak Kaydet
-                </button>
-                <button
-                  onClick={() => setShowBulkInterviewSetupModal(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  İptal
-                </button>
-                <button
-                  onClick={handleStartBulkInterviewProcess}
-                  className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                >
-                  Davetleri Gönder ve Mülakatları Başlat
-                </button>
-              </div>
             </div>
-          </div>
-        </ModalPortal>
-      )}
+          </ModalPortal>
+        )}
 
-      {/* Aday Karşılaştırma Modal */}
-      {showComparisonModal && comparisonCandidates.length === 2 && (
-        <ModalPortal>
-          <div
-            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4"
-            style={{ zIndex: 9999 }}
-            onClick={handleCloseComparisonModal}
-          >
+        {/* Bulk Interview Setup Modal */}
+        {showBulkInterviewSetupModal && (
+          <ModalPortal>
             <div
-              className="bg-white rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col"
-              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4"
+              style={{ zIndex: 9999 }}
+              onClick={() => setShowBulkInterviewSetupModal(false)}
             >
-              {/* Header */}
-              <div className="flex justify-between items-center p-6 border-b border-gray-200">
-                <h2 className="text-3xl font-bold text-slate-700">
-                  Aday Karşılaştırma Analizi
-                </h2>
-                <button
-                  onClick={handleCloseComparisonModal}
-                  className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
-                >
-                  ×
-                </button>
-              </div>
+              <div
+                className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center p-4 sm:p-6 border-b">
+                  <h2 className="text-lg sm:text-xl font-semibold">
+                    Toplu Mülakat Daveti Gönder
+                  </h2>
+                  <button
+                    onClick={() => setShowBulkInterviewSetupModal(false)}
+                    className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="flex-grow overflow-auto p-4 sm:p-6">
+                  <p className="mb-4 text-sm sm:text-base">
+                    <strong>{selectedCandidates.size}</strong> Aday için toplu
+                    mülakat ayarları:
+                  </p>
 
-              {/* Content */}
-              <div className="flex-grow overflow-auto p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-                  {comparisonCandidates.map((candidate, index) => (
-                    <div
-                      key={candidate.id}
-                      className="border p-4 rounded-lg bg-white shadow-sm"
-                    >
-                      <h3 className="text-xl font-bold text-center mb-4">
-                        {candidate.name} {candidate.surname}
-                      </h3>
-
-                      <canvas id={`chart-${candidate.id}`}></canvas>
-
-                      <div className="mt-4">
-                        <h4 className="font-semibold text-green-600">
-                          Güçlü Yönler
-                        </h4>
-                        <ul className="list-disc list-inside text-sm text-slate-600">
-                          {candidate.strengths?.map(
-                            (strength: string, idx: number) => (
-                              <li key={idx}>{strength}</li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-
-                      <div className="mt-2">
-                        <h4 className="font-semibold text-red-600">
-                          Gelişime Açık Yönler
-                        </h4>
-                        <ul className="list-disc list-inside text-sm text-slate-600">
-                          {candidate.weaknesses?.map(
-                            (weakness: string, idx: number) => (
-                              <li key={idx}>{weakness}</li>
-                            )
-                          )}
-                        </ul>
-                      </div>
+                  {/* Şablon Yükle */}
+                  <div className="mb-6">
+                    <label className="block text-base font-semibold mb-2">
+                      Şablon Yükle:
+                    </label>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Önceden kaydettiğiniz bir soru şablonunu yükleyerek mevcut
+                      seçimleri otomatik doldurun.
+                    </p>
+                    <div className="flex gap-2">
+                      <select
+                        value={bulkSelectedTemplate}
+                        onChange={(e) =>
+                          setBulkSelectedTemplate(e.target.value)
+                        }
+                        className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white"
+                      >
+                        <option value="">Şablon Seçiniz</option>
+                        {questionTemplates.map((template) => (
+                          <option key={template.id} value={template.id}>
+                            {template.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() =>
+                          bulkSelectedTemplate &&
+                          loadTemplate(bulkSelectedTemplate, true)
+                        }
+                        disabled={!bulkSelectedTemplate}
+                        className="px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+                      >
+                        Yükle
+                      </button>
                     </div>
-                  ))}
-                </div>
+                  </div>
 
-                <div className="bg-indigo-50 p-6 rounded-lg border border-indigo-200">
-                  <h3 className="font-bold text-lg text-indigo-800 mb-2 flex items-center gap-2">
-                    <i className="fas fa-robot"></i> Yapay Zeka Karşılaştırma
-                    Analizi
-                  </h3>
-                  <p
-                    className="text-sm text-indigo-900"
-                    dangerouslySetInnerHTML={{
-                      __html: (() => {
-                        const key1 = `${comparisonCandidates[0].id}_${comparisonCandidates[1].id}`;
-                        const key2 = `${comparisonCandidates[1].id}_${comparisonCandidates[0].id}`;
-                        const analysis =
-                          (AI_COMPARISON_ANALYSES as any)[key1] ||
-                          (AI_COMPARISON_ANALYSES as any)[key2] ||
-                          "Bu iki aday için henüz karşılaştırma analizi oluşturulmamış.";
-                        return analysis.replace(
-                          /\*\*(.*?)\*\*/g,
-                          "<strong>$1</strong>"
-                        );
-                      })(),
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </ModalPortal>
-      )}
+                  {/* Mülakat Dili */}
+                  <div className="mb-6">
+                    <label className="block text-base font-semibold mb-2">
+                      Mülakat Dili:
+                    </label>
+                    <p className="text-sm text-gray-600 mb-3">
+                      HiriBot adayları bu dilde karşılayacak ve tüm mülakatı bu
+                      dilde yürütecektir.
+                    </p>
+                    <select
+                      value={bulkInterviewLanguage}
+                      onChange={(e) => setBulkInterviewLanguage(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white"
+                    >
+                      <option value="tr">Türkçe</option>
+                      <option value="en">English</option>
+                    </select>
+                  </div>
 
-      {/* Tooltip */}
-      {activeTooltip && (
-        <TooltipPortal>
-          <div
-            className="fixed pointer-events-none z-50"
-            style={{
-              left: tooltipPosition.x - 150,
-              top: tooltipPosition.y - 120,
-            }}
-          >
-            <div className="w-80 bg-gray-900 text-white text-sm rounded-lg p-4 shadow-xl">
-              <div className="space-y-2">
-                {(() => {
-                  const candidate = filteredCandidates.find(
-                    (c) => c.id === activeTooltip
-                  );
-                  return candidate?.compatibilityReasons.map(
-                    (reason, index) => (
-                      <div key={index} className="flex items-start gap-2">
-                        <span className="text-purple-400 mt-1">•</span>
-                        <span className="leading-relaxed">{reason}</span>
+                  {/* İkinci Dil Yetkinliği */}
+                  <div className="mb-6">
+                    <label className="block text-base font-semibold mb-2">
+                      Ek Dil Yetkinliği Değerlendir:
+                    </label>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Adayların mülakat sırasında ek bir dilde (örn. İngilizce)
+                      yetkinliğinin değerlendirilmesini ister misiniz?
+                    </p>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="checkbox"
+                        checked={bulkAssessSecondLanguage}
+                        onChange={(e) =>
+                          setBulkAssessSecondLanguage(e.target.checked)
+                        }
+                        className="w-5 h-5 text-purple-600 rounded focus:ring-purple-500 border-gray-300"
+                      />
+                      <label className="text-gray-700 font-medium">
+                        İngilizce Yetkinliğini Değerlendir
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Yetkinlikler */}
+                  <div className="mb-6">
+                    <label className="block text-base font-semibold mb-2">
+                      Pozisyona Özel Yetkinlikler (Soru Kütüphanesi):
+                    </label>
+                    <p className="text-sm text-gray-600 mb-3">
+                      HiriBot'un mülakat sırasında hangi yetkinlikler üzerine
+                      odaklanmasını istersiniz?
+                    </p>
+                    <div className="flex flex-wrap gap-2 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      {competencies.map((competency) => (
+                        <button
+                          key={competency}
+                          onClick={() => toggleCompetency(competency, true)}
+                          className={`px-3 py-2 rounded-md border font-medium transition-colors text-sm ${
+                            bulkSelectedCompetencies.has(competency)
+                              ? "bg-purple-600 text-white border-purple-600"
+                              : "bg-white text-gray-700 border-gray-300 hover:border-purple-300"
+                          }`}
+                        >
+                          {competency}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-600">
+                        Seçilen yetkinlikler:{" "}
+                        {bulkSelectedCompetencies.size > 0
+                          ? Array.from(bulkSelectedCompetencies).join(", ")
+                          : "Yok"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Genel Konular */}
+                  <div className="mb-6">
+                    <label className="block text-base font-semibold mb-2">
+                      Ek Bilgiler ve Özel Konular:
+                    </label>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Adaylardan mülakat sırasında öğrenmek istediğiniz CV dışı
+                      genel bilgileri seçin.
+                    </p>
+                    <div className="flex flex-wrap gap-2 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      {generalTopics.map((topic) => (
+                        <button
+                          key={topic}
+                          onClick={() => toggleGeneralTopic(topic, true)}
+                          className={`px-3 py-2 rounded-md border font-medium transition-colors text-sm ${
+                            bulkSelectedGeneralTopics.has(topic)
+                              ? "bg-purple-600 text-white border-purple-600"
+                              : "bg-white text-gray-700 border-gray-300 hover:border-purple-300"
+                          }`}
+                        >
+                          {topic}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-600">
+                        Seçilen konular:{" "}
+                        {bulkSelectedGeneralTopics.size > 0
+                          ? Array.from(bulkSelectedGeneralTopics).join(", ")
+                          : "Yok"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Manuel Soru Ekle */}
+                  <div className="mb-6">
+                    <label className="block text-base font-semibold mb-2">
+                      Manuel Özel Soru Ekle:
+                    </label>
+                    <p className="text-sm text-gray-600 mb-3">
+                      HiriBot'un adaylara sormasını istediğiniz spesifik bir
+                      soru ekleyin.
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={bulkCustomQuestionInput}
+                        onChange={(e) =>
+                          setBulkCustomQuestionInput(e.target.value)
+                        }
+                        placeholder="Örn: X projesindeki rolünüz neydi?"
+                        className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                      />
+                      <button
+                        onClick={() => addCustomQuestion(true)}
+                        className="px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+                      >
+                        Soru Ekle
+                      </button>
+                    </div>
+                    {bulkManualQuestions.size > 0 && (
+                      <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                        <p className="text-sm text-gray-600 mb-2">
+                          Eklenen manuel sorular:
+                        </p>
+                        <ul className="list-disc list-inside text-sm text-gray-600">
+                          {Array.from(bulkManualQuestions).map(
+                            (question, index) => (
+                              <li key={index}>{question}</li>
+                            )
+                          )}
+                        </ul>
                       </div>
-                    )
-                  );
-                })()}
-              </div>
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2">
-                <div className="border-4 border-transparent border-t-gray-900"></div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row justify-end gap-3 p-4 sm:p-6 border-t">
+                  <button
+                    onClick={() => saveTemplate(true)}
+                    className="px-4 py-2 text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors"
+                  >
+                    Şablon Olarak Kaydet
+                  </button>
+                  <button
+                    onClick={() => setShowBulkInterviewSetupModal(false)}
+                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    İptal
+                  </button>
+                  <button
+                    onClick={handleStartBulkInterviewProcess}
+                    className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    Davetleri Gönder ve Mülakatları Başlat
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </TooltipPortal>
-      )}
+          </ModalPortal>
+        )}
 
-      {/* Modals */}
-      <SuccessModal
-        isOpen={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
-        title={modalContent.title}
-        message={modalContent.message}
-      />
+        {/* Aday Karşılaştırma Modal */}
+        {showComparisonModal && comparisonCandidates.length === 2 && (
+          <ModalPortal>
+            <div
+              className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4"
+              style={{ zIndex: 9999 }}
+              onClick={handleCloseComparisonModal}
+            >
+              <div
+                className="bg-white rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div className="flex justify-between items-center p-6 border-b border-gray-200">
+                  <h2 className="text-3xl font-bold text-slate-700">
+                    Aday Karşılaştırma Analizi
+                  </h2>
+                  <button
+                    onClick={handleCloseComparisonModal}
+                    className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
+                  >
+                    ×
+                  </button>
+                </div>
 
-      <ErrorModal
-        isOpen={showErrorModal}
-        onClose={() => setShowErrorModal(false)}
-        title={modalContent.title}
-        message={modalContent.message}
-      />
+                {/* Content */}
+                <div className="flex-grow overflow-auto p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                    {comparisonCandidates.map((candidate, index) => (
+                      <div
+                        key={candidate.id}
+                        className="border p-4 rounded-lg bg-white shadow-sm"
+                      >
+                        <h3 className="text-xl font-bold text-center mb-4">
+                          {candidate.name} {candidate.surname}
+                        </h3>
 
-      <ConfirmationModal
-        isOpen={showConfirmationModal}
-        onClose={() => setShowConfirmationModal(false)}
-        onConfirm={confirmationAction}
-        title={modalContent.title}
-        message={modalContent.message}
-      />
-    </div>
+                        <canvas id={`chart-${candidate.id}`}></canvas>
+
+                        <div className="mt-4">
+                          <h4 className="font-semibold text-green-600">
+                            Güçlü Yönler
+                          </h4>
+                          <ul className="list-disc list-inside text-sm text-slate-600">
+                            {candidate.strengths?.map(
+                              (strength: string, idx: number) => (
+                                <li key={idx}>{strength}</li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+
+                        <div className="mt-2">
+                          <h4 className="font-semibold text-red-600">
+                            Gelişime Açık Yönler
+                          </h4>
+                          <ul className="list-disc list-inside text-sm text-slate-600">
+                            {candidate.weaknesses?.map(
+                              (weakness: string, idx: number) => (
+                                <li key={idx}>{weakness}</li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="bg-indigo-50 p-6 rounded-lg border border-indigo-200">
+                    <h3 className="font-bold text-lg text-indigo-800 mb-2 flex items-center gap-2">
+                      <i className="fas fa-robot"></i> Yapay Zeka Karşılaştırma
+                      Analizi
+                    </h3>
+                    <p
+                      className="text-sm text-indigo-900"
+                      dangerouslySetInnerHTML={{
+                        __html: (() => {
+                          const key1 = `${comparisonCandidates[0].id}_${comparisonCandidates[1].id}`;
+                          const key2 = `${comparisonCandidates[1].id}_${comparisonCandidates[0].id}`;
+                          const analysis =
+                            (AI_COMPARISON_ANALYSES as any)[key1] ||
+                            (AI_COMPARISON_ANALYSES as any)[key2] ||
+                            "Bu iki aday için henüz karşılaştırma analizi oluşturulmamış.";
+                          return analysis.replace(
+                            /\*\*(.*?)\*\*/g,
+                            "<strong>$1</strong>"
+                          );
+                        })(),
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ModalPortal>
+        )}
+
+        {/* Tooltip */}
+        {activeTooltip && (
+          <TooltipPortal>
+            <div
+              className="fixed pointer-events-none z-50"
+              style={{
+                left: tooltipPosition.x - 150,
+                top: tooltipPosition.y - 120,
+              }}
+            >
+              <div className="w-80 bg-gray-900 text-white text-sm rounded-lg p-4 shadow-xl">
+                <div className="space-y-2">
+                  {(() => {
+                    const candidate = filteredCandidates.find(
+                      (c) => c.id === activeTooltip
+                    );
+                    return candidate?.compatibilityReasons.map(
+                      (reason, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <span className="text-purple-400 mt-1">•</span>
+                          <span className="leading-relaxed">{reason}</span>
+                        </div>
+                      )
+                    );
+                  })()}
+                </div>
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2">
+                  <div className="border-4 border-transparent border-t-gray-900"></div>
+                </div>
+              </div>
+            </div>
+          </TooltipPortal>
+        )}
+
+        {/* Modals */}
+        <SuccessModal
+          isOpen={showSuccessModal}
+          onClose={() => setShowSuccessModal(false)}
+          title={modalContent.title}
+          message={modalContent.message}
+        />
+
+        <ErrorModal
+          isOpen={showErrorModal}
+          onClose={() => setShowErrorModal(false)}
+          title={modalContent.title}
+          message={modalContent.message}
+        />
+
+        <ConfirmationModal
+          isOpen={showConfirmationModal}
+          onClose={() => setShowConfirmationModal(false)}
+          onConfirm={confirmationAction}
+          title={modalContent.title}
+          message={modalContent.message}
+        />
+      </div>
+    </DashboardLayout>
   );
 }

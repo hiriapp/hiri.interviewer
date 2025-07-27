@@ -134,7 +134,7 @@ DELETE /api/positions/{id}      # Pozisyon sil
 ```json
 {
   "id": "string",
-  "title": "string", // "Senior Software Developer - Turkcell"
+  "title": "string", // "Senior Software Developer - Kurum"
   "description": "string", // Detaylı açıklama
   "requirements": ["string"], // Gereksinimler listesi
   "responsibilities": ["string"], // Sorumluluklar listesi

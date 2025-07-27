@@ -5,7 +5,7 @@ export const DUMMY_CANDIDATES = [
     surname: "Coşkun",
     email: "b.coskun@email.com",
     phone: "+90 555 123 4567",
-    position: "Senior Software Developer - Turkcell",
+    position: "Senior Software Developer - Kurum",
     source: { icon: 'fab fa-linkedin', color: 'text-blue-500', name: 'LinkedIn' },
     compatibilityScore: 88,
     compatibilityReasons: [
@@ -119,7 +119,7 @@ SERTİFİKALAR
     surname: "Kaya",
     email: "zeynep.kaya@email.com",
     phone: "+90 555 987 6543",
-    position: "Senior Software Developer - Turkcell",
+    position: "Senior Software Developer - Kurum",
     source: { icon: 'fas fa-file-alt', color: 'text-gray-500', name: 'CV Yüklendi' },
     compatibilityScore: 82,
     compatibilityReasons: [
